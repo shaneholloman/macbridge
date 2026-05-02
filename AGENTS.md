@@ -61,10 +61,10 @@ This repository is greenfield. Refactor freely when it improves the product shap
 
 ## Verification
 
-Before taking on packaging, distribution, or build-system work, read:
+Before taking on packaging, distribution, permission, or build-system work, read:
 
 ```sh
-docs/development/handoff.md
+docs/development/apple-privacy-and-launch-services.md
 ```
 
 Run the repo-wide sanity check before committing:

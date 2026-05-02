@@ -20,8 +20,8 @@ export const packageContract: PackageContract = {
   },
   files: [
     "dist/agent/*.d.ts",
-    "dist/app/darwin-arm64/MacBridge.app",
-    "dist/app/darwin-x64/MacBridge.app",
+    "dist/darwin-arm64/MacBridge.app",
+    "dist/darwin-x64/MacBridge.app",
     "dist/bin/macbridge",
     "dist/bin/macbridge-darwin-arm64",
     "dist/bin/macbridge-darwin-x64",

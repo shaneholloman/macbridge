@@ -67,16 +67,18 @@ Treat product identity as a staged distribution surface:
 1. Add a canonical icon source under `assets/icon/`.
 2. Generate `MacBridge.icns` during the build from checked-in source assets.
 3. Add bundle metadata for MacBridge:
-   - `CFBundleIdentifier`: `com.shaneholloman.macbridge`
+   - `CFBundleIdentifier`: `nz.uic.macbridge`
    - `CFBundleName`: `MacBridge`
    - `CFBundleDisplayName`: `MacBridge`
-   - `CFBundleExecutable`: `macbridge`
+   - `CFBundleExecutable`: `macbridge-shell`
    - `CFBundleIconFile`: `MacBridge`
 4. Add target-specific `MacBridge.app` release artifacts under
-   `dist/app/darwin-arm64/MacBridge.app` and
-   `dist/app/darwin-x64/MacBridge.app`.
-5. Embed or copy the signed native binary into each app bundle at
-   `Contents/MacOS/macbridge`.
+   `dist/darwin-arm64/MacBridge.app` and
+   `dist/darwin-x64/MacBridge.app`.
+5. Embed or copy the signed native adapter into each app bundle at
+   `Contents/MacOS/macbridge`. Keep the rebranded terminal host as the internal
+   `Contents/MacOS/macbridge-shell` executable so the public `macbridge` name
+   always means the adapter command.
 6. Sign nested code first, then sign the app bundle.
 7. Notarize the app bundle in addition to the standalone binaries.
 8. Keep standalone npm package binaries available for fallback verification,

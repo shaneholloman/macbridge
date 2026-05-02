@@ -8,6 +8,11 @@ export type RunOptions = {
   cwd?: string;
   env?: Record<string, string | undefined>;
   allowFailure?: boolean;
+  dryRun?: boolean;
+  logger?: {
+    info: (message: string) => void;
+    ok?: (message: string) => void;
+  };
 };
 
 export async function ensureDir(path: string): Promise<void> {
@@ -60,6 +65,42 @@ export async function run(
 
   log.info({ cmd: cmd.join(" "), durationMs, status: proc.exitCode }, "command finished");
   return result;
+}
+
+export async function runCommand(parts: string[], options: RunOptions = {}): Promise<void> {
+  if (parts.length === 0) {
+    throw new Error("Cannot run empty command");
+  }
+
+  const commandText = parts.map(quoteArg).join(" ");
+  options.logger?.info(`Command: ${commandText}`);
+
+  if (options.dryRun === true) {
+    options.logger?.ok?.(`Dry run skipped: ${commandText}`);
+    return;
+  }
+
+  const runOptions: RunOptions = {
+    ...(options.cwd == null ? {} : { cwd: options.cwd }),
+    ...(options.env == null ? {} : { env: options.env }),
+    ...(options.allowFailure == null ? {} : { allowFailure: options.allowFailure }),
+  };
+  const result = await run(createNoopLogger(), parts, runOptions);
+
+  if (result.status !== 0) {
+    throw new Error(`Command failed (${result.status}): ${commandText}`);
+  }
+}
+
+function quoteArg(value: string): string {
+  return /[^\w./:@=-]/.test(value) ? JSON.stringify(value) : value;
+}
+
+function createNoopLogger(): Logger {
+  return {
+    info: () => undefined,
+    error: () => undefined,
+  } as unknown as Logger;
 }
 
 async function writeRunEvidence(

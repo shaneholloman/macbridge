@@ -37,14 +37,18 @@ const basePackageFiles = [
   "package/docs/development/rfcs/rfc-0008-model-agnostic-agent-loop.md",
   "package/docs/development/rfcs/rfc-0010-multimodal-evidence-and-session-video.md",
   "package/docs/usage.md",
-  "package/dist/app/darwin-arm64/MacBridge.app/Contents/Info.plist",
-  "package/dist/app/darwin-arm64/MacBridge.app/Contents/MacOS/macbridge",
-  "package/dist/app/darwin-arm64/MacBridge.app/Contents/Resources/MacBridge.icns",
-  "package/dist/app/darwin-arm64/MacBridge.app/Contents/Resources/MacBridgeMark.png",
-  "package/dist/app/darwin-x64/MacBridge.app/Contents/Info.plist",
-  "package/dist/app/darwin-x64/MacBridge.app/Contents/MacOS/macbridge",
-  "package/dist/app/darwin-x64/MacBridge.app/Contents/Resources/MacBridge.icns",
-  "package/dist/app/darwin-x64/MacBridge.app/Contents/Resources/MacBridgeMark.png",
+  "package/dist/darwin-arm64/MacBridge.app/Contents/Info.plist",
+  "package/dist/darwin-arm64/MacBridge.app/Contents/MacOS/macbridge",
+  "package/dist/darwin-arm64/MacBridge.app/Contents/MacOS/macbridge-launch",
+  "package/dist/darwin-arm64/MacBridge.app/Contents/MacOS/macbridge-runtime",
+  "package/dist/darwin-arm64/MacBridge.app/Contents/Resources/MacBridge.icns",
+  "package/dist/darwin-arm64/MacBridge.app/Contents/Resources/macbridge-icon.png",
+  "package/dist/darwin-x64/MacBridge.app/Contents/Info.plist",
+  "package/dist/darwin-x64/MacBridge.app/Contents/MacOS/macbridge",
+  "package/dist/darwin-x64/MacBridge.app/Contents/MacOS/macbridge-launch",
+  "package/dist/darwin-x64/MacBridge.app/Contents/MacOS/macbridge-runtime",
+  "package/dist/darwin-x64/MacBridge.app/Contents/Resources/MacBridge.icns",
+  "package/dist/darwin-x64/MacBridge.app/Contents/Resources/macbridge-icon.png",
   "package/dist/bin/macbridge",
   "package/dist/bin/macbridge-darwin-arm64",
   "package/dist/bin/macbridge-darwin-x64",
@@ -74,8 +78,8 @@ const basePackageFiles = [
 ];
 
 const notarizedPackageFiles = [
-  "package/dist/app/darwin-arm64/MacBridge.app/Contents/_CodeSignature/CodeResources",
-  "package/dist/app/darwin-x64/MacBridge.app/Contents/_CodeSignature/CodeResources",
+  "package/dist/darwin-arm64/MacBridge.app/Contents/_CodeSignature/CodeResources",
+  "package/dist/darwin-x64/MacBridge.app/Contents/_CodeSignature/CodeResources",
   "package/dist/build/security/MacBridge-darwin-arm64.app.notary.json",
   "package/dist/build/security/MacBridge-darwin-x64.app.notary.json",
   "package/dist/build/security/macbridge-darwin-arm64.notary.json",
@@ -83,8 +87,8 @@ const notarizedPackageFiles = [
 ];
 
 const optionalPackageFiles = [
-  "package/dist/app/darwin-arm64/MacBridge.app/Contents/CodeResources",
-  "package/dist/app/darwin-x64/MacBridge.app/Contents/CodeResources",
+  "package/dist/darwin-arm64/MacBridge.app/Contents/CodeResources",
+  "package/dist/darwin-x64/MacBridge.app/Contents/CodeResources",
 ];
 
 export const forbiddenPackagePathParts = [

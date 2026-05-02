@@ -78,6 +78,7 @@ Active RFCs:
 - [RFC-0007: App Identity and Icon Distribution](docs/development/rfcs/rfc-0007-app-identity-and-icon-distribution.md)
 - [RFC-0008: Model Agnostic Agent Loop](docs/development/rfcs/rfc-0008-model-agnostic-agent-loop.md)
 - [RFC-0010: Multimodal Evidence and Session Video](docs/development/rfcs/rfc-0010-multimodal-evidence-and-session-video.md)
+- [RFC-0011: Inviting CLI and Shell Experience](docs/development/rfcs/rfc-0011-inviting-cli-and-shell-experience.md)
 
 ## Package Surface
 

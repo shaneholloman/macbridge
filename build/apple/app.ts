@@ -4,9 +4,9 @@ import type { NativeTarget } from "../native/targets.ts";
 import type { BuildArtifact, BuildManifest } from "../runtime/manifest.ts";
 import { paths } from "../runtime/paths.ts";
 import { copyFile, ensureDir, fileSHA256, removePath, run } from "../runtime/runner.ts";
+import { MACBRIDGE_BUNDLE_ID } from "./identity.ts";
 
 const appName = "MacBridge";
-const bundleID = "com.shaneholloman.macbridge";
 const iconName = "MacBridge";
 const brandMarkName = "MacBridgeMark.png";
 const iconSource = "assets/icon/macbridge.svg";
@@ -220,7 +220,7 @@ async function appInfoPlist(target: NativeTarget): Promise<string> {
   <key>CFBundleIconFile</key>
   <string>${iconName}</string>
   <key>CFBundleIdentifier</key>
-  <string>${bundleID}.${target.arch}</string>
+  <string>${MACBRIDGE_BUNDLE_ID}</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
