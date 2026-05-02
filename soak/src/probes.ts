@@ -10,9 +10,9 @@ import {
   Session,
   type Target,
   type WindowInfo,
-} from "../../src/index.ts";
-import type { Soak } from "./context.ts";
-import { fileSize } from "./fs.ts";
+} from "../../src/index.js";
+import type { Soak } from "./context.js";
+import { fileSize } from "./fs.js";
 
 type DisplayInfo = {
   index: number;

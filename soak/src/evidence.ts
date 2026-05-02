@@ -1,5 +1,5 @@
-import type { Json } from "../../src/native/macbridge.ts";
-import type { RunSummary, Status } from "./types.ts";
+import type { Json } from "../../src/native/macbridge.js";
+import type { RunSummary, Status } from "./types.js";
 
 export type RecordingStatus = Status | "missing" | "off";
 

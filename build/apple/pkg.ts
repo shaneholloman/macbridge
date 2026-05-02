@@ -9,8 +9,10 @@ import { LEGACY_MACBRIDGE_BUNDLE_IDS, MACBRIDGE_BUNDLE_ID } from "./identity.ts"
 
 export async function pkg(args: string[] = []): Promise<void> {
   const fromDist = args.includes("--from-dist");
-  const skipNotarize = args.includes("--skip-notarize");
-  const buildArgs = args.filter((arg) => arg !== "--from-dist" && arg !== "--skip-notarize");
+  if (args.includes("--skip-notarize")) {
+    throw new Error("pkg builds must be notarized; remove --skip-notarize");
+  }
+  const buildArgs = args.filter((arg) => arg !== "--from-dist");
   const targets = parseTargets(buildArgs);
   const log = createBuildLog("apple:pkg");
   const manifest = createManifest("apple-pkg");
@@ -55,7 +57,9 @@ export async function pkg(args: string[] = []): Promise<void> {
       join(payload, "usr", "local", "bin", "macbridge"),
       [
         "#!/bin/zsh",
-        'exec "/Applications/MacBridge.app/Contents/MacOS/macbridge-runtime" "$@"',
+        'APP="/Applications/MacBridge.app"',
+        'export BIN="$APP/Contents/MacOS/macbridge-runtime"',
+        'exec bun "$APP/Contents/Resources/macbridge-cli.js" "$@"',
         "",
       ].join("\n"),
     );
@@ -138,40 +142,41 @@ export async function pkg(args: string[] = []): Promise<void> {
       size: Bun.file(installer).size,
     });
 
-    if (!skipNotarize && !config.skipNotarize) {
-      const profile = requireNotaryProfile(config);
-      const result = await run(log, [
-        "xcrun",
-        "notarytool",
-        "submit",
-        installer,
-        "--keychain-profile",
-        profile,
-        "--wait",
-        "--output-format",
-        "json",
-      ]);
-      const notaryResult = JSON.parse(result.stdout) as { status?: string; id?: string };
-      if (notaryResult.status !== "Accepted") {
-        throw new Error(
-          `pkg notarization for ${target.id} was not accepted: ${JSON.stringify(notaryResult)}`,
-        );
-      }
-      const evidencePath = join(
-        paths.dist.security,
-        `macbridge-${packageJSON.version}-${target.id}.pkg.notary.json`,
-      );
-      await Bun.write(evidencePath, `${result.stdout}\n`);
-      await run(log, ["xcrun", "stapler", "staple", installer]);
-      await run(log, ["xcrun", "stapler", "validate", installer]);
-      manifest.artifacts.push({
-        path: evidencePath,
-        kind: "pkg-notary-evidence",
-        target: target.id,
-        sha256: await fileSHA256(evidencePath),
-        size: Bun.file(evidencePath).size,
-      });
+    if (config.skipNotarize) {
+      throw new Error("MACBRIDGE_SKIP_NOTARIZE is set; refusing to create pkg build");
     }
+    const profile = requireNotaryProfile(config);
+    const result = await run(log, [
+      "xcrun",
+      "notarytool",
+      "submit",
+      installer,
+      "--keychain-profile",
+      profile,
+      "--wait",
+      "--output-format",
+      "json",
+    ]);
+    const notaryResult = JSON.parse(result.stdout) as { status?: string; id?: string };
+    if (notaryResult.status !== "Accepted") {
+      throw new Error(
+        `pkg notarization for ${target.id} was not accepted: ${JSON.stringify(notaryResult)}`,
+      );
+    }
+    const evidencePath = join(
+      paths.dist.security,
+      `macbridge-${packageJSON.version}-${target.id}.pkg.notary.json`,
+    );
+    await Bun.write(evidencePath, `${result.stdout}\n`);
+    await run(log, ["xcrun", "stapler", "staple", installer]);
+    await run(log, ["xcrun", "stapler", "validate", installer]);
+    manifest.artifacts.push({
+      path: evidencePath,
+      kind: "pkg-notary-evidence",
+      target: target.id,
+      sha256: await fileSHA256(evidencePath),
+      size: Bun.file(evidencePath).size,
+    });
   }
 
   finishManifest(manifest);
@@ -320,9 +325,7 @@ function escapeHTML(value: string): string {
 }
 
 function preinstallScript(): string {
-  const legacyBundleIds = LEGACY_MACBRIDGE_BUNDLE_IDS
-    .map((id) => `"${id}"`)
-    .join(" ");
+  const legacyBundleIds = LEGACY_MACBRIDGE_BUNDLE_IDS.map((id) => `"${id}"`).join(" ");
   return [
     "#!/bin/zsh",
     "set +e",
@@ -347,8 +350,8 @@ function preinstallScript(): string {
     "}",
     "",
     "legacy_tcc_row_count() {",
-    '  local total=0',
-    '  local count=0',
+    "  local total=0",
+    "  local count=0",
     '  count="$(count_tcc_cleanup_rows "/Library/Application Support/com.apple.TCC/TCC.db" | /usr/bin/tail -n 1)"',
     '  [[ "$count" == <-> ]] && total=$((total + count))',
     '  if [ -n "$CONSOLE_HOME" ]; then',
@@ -367,11 +370,11 @@ function preinstallScript(): string {
     '    delete_legacy_tcc_rows "$CONSOLE_HOME/Library/Application Support/com.apple.TCC/TCC.db"',
     "  fi",
     `  for bundle_id in ${legacyBundleIds}; do`,
-    '    for service in Accessibility ScreenCapture; do',
+    "    for service in Accessibility ScreenCapture; do",
     '      /usr/bin/tccutil reset "$service" "$bundle_id" >/dev/null 2>&1',
     "    done",
     "  done",
-    '  /usr/bin/killall tccd >/dev/null 2>&1',
+    "  /usr/bin/killall tccd >/dev/null 2>&1",
     "}",
     "",
     "cleanup_legacy_tcc_rows",

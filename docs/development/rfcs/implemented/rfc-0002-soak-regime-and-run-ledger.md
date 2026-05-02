@@ -5,7 +5,7 @@ status: Implemented
 owners:
     - MacBridge maintainers
 created: 2026-05-02
-updated: 2026-05-02
+updated: 2026-05-03
 supersedes: []
 superseded_by: null
 ---
@@ -23,7 +23,8 @@ Markdown reports, terminal charts, and screenshot/text artifacts.
 
 - Promote soak testing out of one-off scripts and into `soak/src`.
 - Support `smoke`, `stress`, `burn`, and `tui` commands through Bun.
-- Persist run history under `soak/runs`.
+- Persist run history under a durable local ledger shared by the app shell, npm
+  CLI, and Bun development commands.
 - Record per-step timings as a waterfall.
 - Show success/fail rates over time.
 - Keep live macOS automation opt-in.
@@ -53,6 +54,8 @@ soak/
     regime.ts
     report.ts
     types.ts
+
+~/macbridge/soak/
   runs/
     <timestamp>-<regime>/
       summary.json
@@ -60,6 +63,11 @@ soak/
       report.md
       artifacts/
 ```
+
+`soak/src` is checked-in product source. `~/macbridge/soak` is generated user
+state. `MACBRIDGE_SOAK_ROOT` may override the ledger root for tests and isolated
+advanced workflows, but ordinary development and installed usage should share
+the home-directory ledger so history is not split by launch surface.
 
 `events.ndjson` is the canonical append-only event log for step-level results.
 `summary.json` is the compact machine-readable run result. `report.md` is the

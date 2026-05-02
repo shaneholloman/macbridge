@@ -1,4 +1,4 @@
-import type { RunSummary, Step } from "./types.ts";
+import type { RunSummary, Step } from "./types.js";
 
 function ms(value: number): string {
   if (value < 1000) return `${Math.round(value)}ms`;

@@ -4,7 +4,6 @@ import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { appleConfig, requireNotaryProfile, requireSignIdentity } from "../apple/config.ts";
 import { MACBRIDGE_BUNDLE_ID } from "../apple/identity.ts";
-import { appendArtifactSecurityRecord } from "../runtime/evidence.js";
 import { createBuildLogger } from "../runtime/log.js";
 import type { RuntimeProfile } from "../runtime/profiles.js";
 import { createDmg } from "./artifacts.js";
@@ -57,7 +56,6 @@ function parseArgs(args: string[]): {
   runtimeProfile: RuntimeProfile;
   skipAgentRebuild: boolean;
   skipBuild: boolean;
-  skipNotarize: boolean;
   target: string;
   upgradeOnly: boolean;
   verboseXcodebuild: boolean;
@@ -80,7 +78,6 @@ function parseArgs(args: string[]): {
     runtimeProfile,
     skipAgentRebuild: args.includes("--skip-agent-rebuild"),
     skipBuild: args.includes("--skip-build"),
-    skipNotarize: args.includes("--skip-notarize"),
     target,
     upgradeOnly: args.includes("--upgrade-only"),
     verboseXcodebuild:
@@ -95,13 +92,13 @@ function usage(): string {
 MacBridge Builder
 
 Usage:
-  bun build/ghostty/cli.ts [--target=<target>] [--runtime-profile=<shell>] [--dmg] [--latest-ghostty] [--skip-build] [--skip-agent-rebuild] [--debug-maps] [--skip-notarize] [--upgrade-only] [--verbose-xcodebuild]
+  bun build/ghostty/cli.ts [--target=<target>] [--runtime-profile=<shell>] [--dmg] [--latest-ghostty] [--skip-build] [--skip-agent-rebuild] [--debug-maps] [--upgrade-only] [--verbose-xcodebuild]
 
 Examples:
   bun build/ghostty/cli.ts --target=darwin-arm64
   bun build/ghostty/cli.ts --target=darwin-arm64 --runtime-profile=shell
   bun build/ghostty/cli.ts --dmg --latest-ghostty
-  bun build/ghostty/cli.ts --skip-build --skip-agent-rebuild --skip-notarize
+  bun build/ghostty/cli.ts --skip-build --skip-agent-rebuild
   bun build/ghostty/cli.ts --latest-ghostty --upgrade-only
 `.trim();
 }
@@ -129,6 +126,9 @@ async function verifyUpgradeCompatibility(): Promise<void> {
 
 export async function runGhosttyPackaging(args = process.argv.slice(2)): Promise<void> {
   const options = parseArgs(args);
+  if (args.includes("--skip-notarize")) {
+    throw new Error("shell builds must be notarized; remove --skip-notarize");
+  }
   if (options.help) {
     process.stdout.write(`${usage()}\n`);
     return;
@@ -216,34 +216,14 @@ export async function runGhosttyPackaging(args = process.argv.slice(2)): Promise
     );
   }
 
-  if (!options.skipNotarize) {
-    await notarizeGhosttyArtifacts({
-      appBundlePath,
-      appName: CONFIG.appNameShort,
-      dmgName,
-      dmgPath,
-      keychainProfile: NOTARIZE_PROFILE,
-      log,
-    });
-  } else {
-    appendArtifactSecurityRecord({
-      artifactKind: "appBundle",
-      artifactPath: appBundlePath,
-      note: "Skipped via --skip-notarize",
-      operation: "notarize",
-      status: "skipped",
-    });
-    if (dmgPath) {
-      appendArtifactSecurityRecord({
-        artifactKind: "dmg",
-        artifactPath: dmgPath,
-        note: "Skipped via --skip-notarize",
-        operation: "notarize",
-        status: "skipped",
-      });
-    }
-    log.info("Skipping notarization (--skip-notarize)");
-  }
+  await notarizeGhosttyArtifacts({
+    appBundlePath,
+    appName: CONFIG.appNameShort,
+    dmgName,
+    dmgPath,
+    keychainProfile: NOTARIZE_PROFILE,
+    log,
+  });
 
   process.stdout.write("\nBuild complete.\n");
 }

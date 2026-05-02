@@ -58,7 +58,10 @@ func parseWindowMaximizeOptions(cursor: inout ArgumentCursor) throws -> (String,
 }
 
 func runWindowsSubcommand(cursor: inout ArgumentCursor) throws {
-    guard !cursor.args.isEmpty else { throw CUAError.usage("windows needs a command") }
+    guard !cursor.args.isEmpty else {
+        try printJSON(listWindows(filter: AppFilter()))
+        return
+    }
     let command = try cursor.pop()
     switch command {
     case "list":
@@ -96,7 +99,10 @@ func runWindowsSubcommand(cursor: inout ArgumentCursor) throws {
 }
 
 func runDisplaysSubcommand(cursor: inout ArgumentCursor) throws {
-    guard !cursor.args.isEmpty else { throw CUAError.usage("displays needs a command") }
+    guard !cursor.args.isEmpty else {
+        try printJSON(listDisplays().map(\.jsonObject))
+        return
+    }
     let command = try cursor.pop()
     switch command {
     case "list":
@@ -110,7 +116,7 @@ func runDisplaysSubcommand(cursor: inout ArgumentCursor) throws {
 }
 
 func runCaptureSubcommand(cursor: inout ArgumentCursor) throws {
-    guard !cursor.args.isEmpty else { throw CUAError.usage("capture needs a target") }
+    guard !cursor.args.isEmpty else { throw CUAError.usage(compactCaptureHelp()) }
     let target = try cursor.pop()
     switch target {
     case "window":
@@ -135,7 +141,7 @@ func runCaptureSubcommand(cursor: inout ArgumentCursor) throws {
 }
 
 func runActSubcommand(cursor: inout ArgumentCursor) throws {
-    guard !cursor.args.isEmpty else { throw CUAError.usage("act needs a target") }
+    guard !cursor.args.isEmpty else { throw CUAError.usage(compactActHelp()) }
     let target = try cursor.pop()
     switch target {
     case "window":

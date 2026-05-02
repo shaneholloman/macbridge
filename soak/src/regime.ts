@@ -1,4 +1,4 @@
-import type { Soak } from "./context.ts";
+import type { Soak } from "./context.js";
 import {
   basicDiscovery,
   captureActiveWindow,
@@ -9,8 +9,8 @@ import {
   permissionPreflight,
   serviceWorkflow,
   stopServices,
-} from "./probes.ts";
-import type { Regime } from "./types.ts";
+} from "./probes.js";
+import type { Regime } from "./types.js";
 
 export async function runRegime(ctx: Soak): Promise<void> {
   await stopServices(ctx);

@@ -1,6 +1,6 @@
-import type { Json } from "../../src/native/macbridge.ts";
-import { readHistory, readRunSteps } from "./history.ts";
-import type { RunSummary, Step } from "./types.ts";
+import type { Json } from "../../src/native/macbridge.js";
+import { readHistory, readRunSteps } from "./history.js";
+import type { RunSummary, Step } from "./types.js";
 
 export type Capability = {
   id: string;

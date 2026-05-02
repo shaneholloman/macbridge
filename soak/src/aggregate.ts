@@ -1,9 +1,10 @@
 import { createClient } from "@libsql/client";
-import { renderHistory } from "./display.ts";
-import { type RecordingEvidence, recordingEvidence } from "./evidence.ts";
-import { ensureDir, writeJSON } from "./fs.ts";
-import { readRunSteps } from "./history.ts";
-import type { Regime, RunSummary, Status, Step } from "./types.ts";
+import { renderHistory } from "./display.js";
+import { type RecordingEvidence, recordingEvidence } from "./evidence.js";
+import { ensureDir, writeJSON } from "./fs.js";
+import { readRunSteps } from "./history.js";
+import { soakRoot } from "./paths.js";
+import type { Regime, RunSummary, Status, Step } from "./types.js";
 
 type DurationStats = {
   count: number;
@@ -56,10 +57,21 @@ export type AggregateReport = {
   recordings: RecordingEvidence[];
 };
 
-const reportsDir = "soak/reports";
-const latestJSON = `${reportsDir}/latest.json`;
-const latestMarkdown = `${reportsDir}/latest.md`;
-const indexPath = `${reportsDir}/index.db`;
+function reportsDir(): string {
+  return `${soakRoot()}/reports`;
+}
+
+function latestJSON(): string {
+  return `${reportsDir()}/latest.json`;
+}
+
+function latestMarkdown(): string {
+  return `${reportsDir()}/latest.md`;
+}
+
+function indexPath(): string {
+  return `${reportsDir()}/index.db`;
+}
 
 function pct(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
@@ -324,8 +336,8 @@ export function aggregateMarkdown(report: AggregateReport, history: RunSummary[]
 }
 
 export async function indexAggregate(history: RunSummary[]): Promise<void> {
-  await ensureDir(reportsDir);
-  const client = createClient({ url: `file:${indexPath}` });
+  await ensureDir(reportsDir());
+  const client = createClient({ url: `file:${indexPath()}` });
   try {
     await client.executeMultiple(`
       drop table if exists steps;
@@ -458,10 +470,10 @@ export async function indexAggregate(history: RunSummary[]): Promise<void> {
 }
 
 export async function writeAggregateReports(history: RunSummary[]): Promise<AggregateReport> {
-  await ensureDir(reportsDir);
+  await ensureDir(reportsDir());
   const report = await buildAggregate(history);
-  await writeJSON(latestJSON, report);
-  await Bun.write(latestMarkdown, aggregateMarkdown(report, history));
+  await writeJSON(latestJSON(), report);
+  await Bun.write(latestMarkdown(), aggregateMarkdown(report, history));
   await indexAggregate(history);
   return report;
 }

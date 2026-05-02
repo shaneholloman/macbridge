@@ -1,9 +1,11 @@
-import { existsSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { basename, join } from "node:path";
 import { $ } from "bun";
 import { appendArtifactSecurityRecord } from "../runtime/evidence.js";
 import type { BuildLogger } from "../runtime/log.js";
 import { notarizeArtifact } from "../runtime/notary.js";
+import { paths } from "../runtime/paths.ts";
+import { ensureDir, removePath } from "../runtime/runner.ts";
 
 export interface SignAppBundleInputs {
   appBundlePath: string;
@@ -94,7 +96,9 @@ export async function notarizeGhosttyArtifacts(
 ): Promise<void> {
   const appBundleName = basename(inputs.appBundlePath);
   const appNotarizeStage = inputs.log.start(`Notarizing ${appBundleName}`);
-  const appZip = `${inputs.appBundlePath}.zip`;
+  await ensureDir(paths.tmpNotary);
+  const appZip = join(paths.tmpNotary, `${appBundleName}.zip`);
+  await removePath(appZip);
   await $`ditto -c -k --keepParent ${inputs.appBundlePath} ${appZip}`.quiet();
   try {
     try {
@@ -122,7 +126,7 @@ export async function notarizeGhosttyArtifacts(
       throw error;
     }
   } finally {
-    rmSync(appZip, { force: true });
+    await removePath(appZip);
   }
   appNotarizeStage.ok(`${appBundleName} notarization complete`);
 

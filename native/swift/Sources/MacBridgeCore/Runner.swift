@@ -2,7 +2,10 @@ import Foundation
 
 public func run(_ arguments: [String]) throws {
     var cursor = ArgumentCursor(args: Array(arguments.dropFirst()))
-    guard !cursor.args.isEmpty else { throw CUAError.usage(usage()) }
+    guard !cursor.args.isEmpty else {
+        printHome()
+        return
+    }
     let command = try cursor.pop()
 
     switch command {
@@ -10,8 +13,21 @@ public func run(_ arguments: [String]) throws {
         try runCursorDaemon()
     case "service":
         try runServiceSubcommand(cursor: &cursor)
-    case "help", "--help", "-h":
+    case "help":
+        if cursor.args.first == "all" {
+            _ = try cursor.pop()
+            print(usage())
+        } else {
+            print(compactUsage())
+        }
+    case "--help", "-h":
+        print(compactUsage())
+    case "--help-full":
         print(usage())
+    case "doctor":
+        runDoctor()
+    case "setup":
+        runSetup()
     case "active-window":
         try printJSON(listWindows(filter: AppFilter(pid: try frontmostApp().processIdentifier)).first ?? frontmostWindow().jsonObject)
     case "cursor":

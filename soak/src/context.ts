@@ -1,15 +1,16 @@
-import { createLogger } from "../../src/core/log.ts";
+import { createLogger } from "../../src/core/log.js";
 import {
   defaultBin,
   ensureExecutable,
   type Json,
   run,
   runJSON,
-} from "../../src/native/macbridge.ts";
-import { writeAggregateReports } from "./aggregate.ts";
-import { appendLine, ensureDir, stamp, writeJSON } from "./fs.ts";
-import { markdownReport } from "./report.ts";
-import type { Regime, RunSummary, Status, Step } from "./types.ts";
+} from "../../src/native/macbridge.js";
+import { writeAggregateReports } from "./aggregate.js";
+import { appendLine, ensureDir, stamp, writeJSON } from "./fs.js";
+import { soakRoot } from "./paths.js";
+import { markdownReport } from "./report.js";
+import type { Regime, RunSummary, Status, Step } from "./types.js";
 
 type Options = {
   regime: Regime;
@@ -36,7 +37,7 @@ export class Soak {
 
   constructor(readonly options: Options) {
     this.id = `${stamp()}-${options.regime}`;
-    this.runDir = `soak/runs/${this.id}`;
+    this.runDir = `${soakRoot()}/runs/${this.id}`;
     this.artifactDir = `${this.runDir}/artifacts`;
     this.eventPath = `${this.runDir}/events.ndjson`;
   }
@@ -148,8 +149,8 @@ export class Soak {
   }
 
   private async acquireLock(): Promise<void> {
-    await ensureDir("soak/runs");
-    const lockDir = "soak/runs/.lock";
+    await ensureDir(`${soakRoot()}/runs`);
+    const lockDir = `${soakRoot()}/runs/.lock`;
     const lock = Bun.spawnSync({
       cmd: ["mkdir", lockDir],
       stdin: "ignore",
@@ -180,7 +181,7 @@ export class Soak {
 
   private releaseLock(): void {
     if (!this.lockHeld) return;
-    Bun.spawnSync({ cmd: ["rm", "-rf", "soak/runs/.lock"], stdin: "ignore" });
+    Bun.spawnSync({ cmd: ["rm", "-rf", `${soakRoot()}/runs/.lock`], stdin: "ignore" });
     this.lockHeld = false;
   }
 }

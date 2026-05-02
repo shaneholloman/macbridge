@@ -17,4 +17,4 @@ other RFCs remain in `docs/development/rfcs/`.
 | RFC-0008 | In Progress | `rfc-0008-model-agnostic-agent-loop.md`                               | Model Agnostic Agent Loop                   |
 | RFC-0009 | Implemented | `implemented/rfc-0009-public-typescript-api-and-cli-semantics.md`     | Public TypeScript API and CLI Semantics     |
 | RFC-0010 | In Progress | `rfc-0010-multimodal-evidence-and-session-video.md`                   | Multimodal Evidence and Session Video       |
-| RFC-0011 | Draft       | `rfc-0011-inviting-cli-and-shell-experience.md`                       | Inviting CLI and Shell Experience           |
+| RFC-0011 | In Progress | `rfc-0011-inviting-cli-and-shell-experience.md`                       | Inviting CLI and Shell Experience           |

@@ -1,7 +1,7 @@
 ---
 id: RFC-0011
 name: Inviting CLI and Shell Experience
-status: Draft
+status: In Progress
 owners:
     - MacBridge maintainers
 created: 2026-05-03

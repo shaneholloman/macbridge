@@ -1,4 +1,4 @@
-import type { Json } from "../../src/native/macbridge.ts";
+import type { Json } from "../../src/native/macbridge.js";
 
 export type Regime = "smoke" | "stress" | "burn";
 

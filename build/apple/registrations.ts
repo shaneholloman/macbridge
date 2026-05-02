@@ -9,7 +9,10 @@ const LSREGISTER =
   "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister";
 
 const TCC_SERVICES = ["Accessibility", "ScreenCapture"] as const;
-const USER_TCC_DB = join(process.env.HOME ?? "", "Library/Application Support/com.apple.TCC/TCC.db");
+const USER_TCC_DB = join(
+  process.env.HOME ?? "",
+  "Library/Application Support/com.apple.TCC/TCC.db",
+);
 const SYSTEM_TCC_DB = "/Library/Application Support/com.apple.TCC/TCC.db";
 
 const STALE_LAUNCH_SERVICES_PATHS = [
@@ -39,6 +42,7 @@ const STALE_LAUNCH_SERVICES_PATHS = [
   "/Applications/MacBridge.localized/MacBridge.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
   `${process.env.HOME ?? ""}/.Trash/MacBridge.app`,
   `${process.env.HOME ?? ""}/.Trash/darwin-arm64/MacBridge.app`,
+  `${process.env.HOME ?? ""}/.Trash/ghostty/macos/build/ReleaseLocal/MacBridge.app`,
 ].filter((path) => path.length > 0);
 
 const INSTALLED_MACBRIDGE_PATHS = [
@@ -46,6 +50,7 @@ const INSTALLED_MACBRIDGE_PATHS = [
   "/Applications/MacBridge.localized",
   `${process.env.HOME ?? ""}/.Trash/MacBridge.app`,
   `${process.env.HOME ?? ""}/.Trash/darwin-arm64`,
+  `${process.env.HOME ?? ""}/.Trash/ghostty`,
   join(ROOT, "dist/pkg/darwin-arm64/payload/Applications/MacBridge.app"),
   join(ROOT, "dist/pkg/darwin-x64/payload/Applications/MacBridge.app"),
   join(ROOT, "tmp/ghostty/macos/build/ReleaseLocal/MacBridge.app"),
@@ -82,8 +87,7 @@ export async function terminateMacBridgeProcesses(
 
 export async function resetMacBridgeTcc(options: RegistrationCleanupOptions = {}): Promise<void> {
   const log = createBuildLog("tcc-reset");
-  const canUseSudo =
-    options.dryRun === true ? false : await canUseSudoNonInteractive(log);
+  const canUseSudo = options.dryRun === true ? false : await canUseSudoNonInteractive(log);
   const bundleIds = [
     ...(options.includeCurrent === false ? [] : [MACBRIDGE_BUNDLE_ID]),
     ...LEGACY_MACBRIDGE_BUNDLE_IDS,
@@ -134,12 +138,7 @@ async function resetResolvableLegacyTccClient(
     return;
   }
 
-  const localAppPath = join(
-    ROOT,
-    "tmp",
-    "tcc-reset",
-    `${bundleId.replaceAll(".", "-")}.app`,
-  );
+  const localAppPath = join(ROOT, "tmp", "tcc-reset", `${bundleId.replaceAll(".", "-")}.app`);
   const appPath = `/Applications/MacBridge TCC Reset ${bundleId.replaceAll(".", "-")}.app`;
   const contents = join(localAppPath, "Contents");
   const macos = join(contents, "MacOS");
@@ -255,7 +254,9 @@ function escapePlist(value: string): string {
     .replaceAll("'", "&apos;");
 }
 
-async function discoverMacBridgeTccClients(log: ReturnType<typeof createBuildLog>): Promise<string[]> {
+async function discoverMacBridgeTccClients(
+  log: ReturnType<typeof createBuildLog>,
+): Promise<string[]> {
   const sql = "select distinct client from access where lower(client) like '%macbridge%';";
   const clients = new Set<string>();
 
@@ -316,7 +317,7 @@ export async function removeInstalledMacBridgeApps(
 
     try {
       await removePath(appPath);
-    } catch (error) {
+    } catch (_error) {
       log.info({ path: appPath }, "direct removal failed; retrying with sudo");
       await run(log, ["sudo", "rm", "-rf", appPath], { allowFailure: false });
     }

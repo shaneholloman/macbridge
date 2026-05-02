@@ -1,12 +1,4 @@
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  renameSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { $ } from "bun";
 import type { BuildLogger } from "../runtime/log.ts";
@@ -28,10 +20,11 @@ export interface BundleInputs {
 
 const APP_SHELL_BINARY_NAME = "macbridge";
 const APP_RUNTIME_BINARY_NAME = "macbridge-runtime";
+const APP_CLI_NAME = "macbridge-cli.js";
 const APP_LAUNCHER_SCRIPT_NAME = "macbridge-launch";
 const SHELL_CONFIG_NAME = "macbridge-config";
 
-function buildShippingConfig(): string {
+export function buildShippingConfig(): string {
   return `command = /bin/zsh -l -c 'RESOURCES="\${MACBRIDGE_RESOURCES_DIR:-/Applications/MacBridge.app/Contents/Resources/macbridge}"; LAUNCHER="\${RESOURCES}/../../MacOS/${APP_LAUNCHER_SCRIPT_NAME}"; exec "$LAUNCHER"'
 background = #1A1A1A
 window-width = 120
@@ -45,12 +38,13 @@ window-decoration = true
 `;
 }
 
-function buildLauncherScript(): string {
+export function buildLauncherScript(): string {
   return `#!/bin/zsh
 
 set -e
 
-MACBRIDGE_BIN="\${0:A:h}/${APP_RUNTIME_BINARY_NAME}"
+MACBRIDGE_NATIVE_BIN="\${0:A:h}/${APP_RUNTIME_BINARY_NAME}"
+MACBRIDGE_CLI="\${0:A:h}/../Resources/${APP_CLI_NAME}"
 SUPPORT_DIR="\${HOME}/Library/Application Support/MacBridge/Shell"
 ZDOTDIR="\${SUPPORT_DIR}/zdotdir"
 mkdir -p "$ZDOTDIR"
@@ -61,58 +55,67 @@ if [ "$MACBRIDGE_SOURCE_USER_ZSHRC" = "1" ] && [ -r "$HOME/.zshrc" ]; then
 fi
 
 export MACBRIDGE_SHELL=1
+export BIN="$MACBRIDGE_NATIVE_BIN"
 export HISTFILE="$HOME/Library/Application Support/MacBridge/Shell/history"
 export SAVEHIST=10000
 export HISTSIZE=10000
 setopt append_history interactive_comments no_beep
 
-macbridge() {
+macbridge_route() {
+  if [ ! -r "$MACBRIDGE_CLI" ]; then
+    print -u2 "MacBridge CLI bundle is missing: $MACBRIDGE_CLI"
+    return 127
+  fi
+
+  if ! command -v bun >/dev/null 2>&1; then
+    print -u2 "MacBridge needs bun on PATH to run the TypeScript control plane."
+    return 127
+  fi
+
   if [ "$#" -eq 0 ]; then
-    mb-help
+    bun "$MACBRIDGE_CLI"
     return 0
   fi
 
-  "$MACBRIDGE_BIN" "$@"
+  bun "$MACBRIDGE_CLI" "$@"
+}
+
+macbridge() {
+  macbridge_route "$@"
 }
 
 mb() {
-  if [ "$#" -eq 0 ]; then
-    mb-help
-    return 0
-  fi
-
-  "$MACBRIDGE_BIN" "$@"
+  macbridge_route "$@"
 }
 
-mb-help() {
+macbridge-help() {
   cat <<'HELP'
 MacBridge Shell
 
 Commands:
-  mb --help
-  mb permissions check
-  mb windows list
-  mb displays list
-  mb capture foreground-display main --path screenshot.png
+  macbridge setup
+  macbridge doctor
+  macbridge reports
+  macbridge soak tui
+  macbridge soak smoke
+  macbridge windows list
+  macbridge displays list
 
 Use MacBridge > About MacBridge > Permissions for macOS privacy grants.
 Type exit to close this shell.
 HELP
 }
 
-alias permissions='mb permissions check --prompt'
-alias windows='mb windows list'
-alias displays='mb displays list'
-
 autoload -Uz colors
 colors
 PROMPT='%F{red}MacBridge%f %F{244}%1~%f
-%F{green}mb>%f '
-RPROMPT='%F{244}mb-help%f'
+%F{green}>%f '
+RPROMPT='%F{244}macbridge-help%f'
 EOF
 
-export MACBRIDGE_BIN
-export PATH="\${MACBRIDGE_BIN:h}:/usr/local/bin:/opt/homebrew/bin:$PATH"
+export MACBRIDGE_NATIVE_BIN
+export MACBRIDGE_CLI
+export PATH="\${MACBRIDGE_NATIVE_BIN:h}:/usr/local/bin:/opt/homebrew/bin:$PATH"
 export ZDOTDIR
 
 /usr/bin/clear 2>/dev/null || true
@@ -122,16 +125,18 @@ MacBridge Shell
 Ready for native macOS automation.
 
 Try:
-  mb --help
-  mb permissions check
-  mb windows list
-  mb displays list
+  macbridge setup
+  macbridge doctor
+  macbridge reports
+  macbridge soak tui
+  macbridge soak smoke
+  macbridge windows list
+  macbridge displays list
 
 Helpers:
-  mb-help      show MacBridge shell examples
-  permissions open/check macOS privacy grants
-  windows     list visible windows
-  displays    list displays
+  macbridge-help    show MacBridge shell examples
+  macbridge         run a MacBridge command
+  mb                alias for macbridge
 
 EOF
 
@@ -170,6 +175,9 @@ export async function createAppBundle(
   copyFileSync(sourceBinary, join(macosDir, APP_RUNTIME_BINARY_NAME));
   await $`chmod +x ${join(macosDir, APP_RUNTIME_BINARY_NAME)}`.quiet();
   inputs.log.info(`MacBridge binary bundled as ${APP_RUNTIME_BINARY_NAME}`);
+
+  await $`bun build src/cli/main.ts --outdir ${resourcesDir} --target bun --format esm --entry-naming ${APP_CLI_NAME}`.quiet();
+  inputs.log.info("MacBridge TypeScript CLI bundled");
 
   writeFileSync(join(macosDir, APP_LAUNCHER_SCRIPT_NAME), buildLauncherScript());
   await $`chmod +x ${join(macosDir, APP_LAUNCHER_SCRIPT_NAME)}`.quiet();

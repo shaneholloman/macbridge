@@ -148,7 +148,9 @@ Configuration should come from environment variables or local ignored files:
 - `MACBRIDGE_SIGN_IDENTITY`
 - `MACBRIDGE_NOTARY_PROFILE`
 - `MACBRIDGE_NOTARY_KEYCHAIN`
-- `MACBRIDGE_SKIP_NOTARIZE`
+
+Release-producing build commands should notarize their outputs and refuse
+skip-notarization shortcuts.
 
 The local machine may already have the Aria Developer ID setup in Keychain. The
 MacBridge build defaults can use the non-secret identity/profile names from

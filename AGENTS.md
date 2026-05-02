@@ -12,6 +12,34 @@ This repository is greenfield. Refactor freely when it improves the product shap
   belongs in `tmp/swiftpm/`, and generated release/package artifacts belong in
   `dist/`.
 
+## Source Ownership Boundaries
+
+- `src/` owns the TypeScript product engine, command surface, control plane,
+  SDK behavior, and user-facing application logic.
+- `soak/` owns TypeScript confidence and reporting workflows. If a soak/report
+  command becomes user-facing, route it through the TypeScript CLI/control plane
+  instead of reimplementing it elsewhere.
+- `native/swift/` is only the native macOS adapter. It should expose OS
+  capabilities such as windows, displays, capture, input, accessibility,
+  permissions, cursor overlay, and service transport. Do not put product
+  workflow, reporting, shell UX, SDK semantics, or application command logic in
+  Swift.
+- `build/` owns mechanical repository automation: packaging, signing,
+  notarization, release artifacts, source checks, and generated manifests. Build
+  logic must be scripted, repeatable, and non-manual.
+- `tools/` must not exist. Do not create utility-script grab bags. Product
+  behavior belongs in `src/`; repository workflow belongs in `build/`.
+
+When adding behavior, first decide which layer owns it. Do not place logic
+wherever it is quickest to execute. Do not duplicate command behavior across
+TypeScript, Swift, shell scripts, and build scripts. The terminal app, npm CLI,
+and repo CLI should route through one TypeScript command/control-plane surface;
+Swift remains the OS adapter underneath.
+
+If a command is visible to users, it belongs in the TypeScript CLI/control plane
+first. Shell aliases may only forward to it. Swift may only implement the native
+primitive that the TypeScript command calls.
+
 ## Naming
 
 - Prefer short, tight file names. The directory path already carries domain context.

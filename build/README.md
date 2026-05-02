@@ -58,4 +58,7 @@ credentials from committed files:
 - `MACBRIDGE_INSTALLER_IDENTITY`
 - `MACBRIDGE_NOTARY_PROFILE`
 - `MACBRIDGE_NOTARY_KEYCHAIN`
-- `MACBRIDGE_SKIP_NOTARIZE`
+
+Release-producing build commands are expected to notarize their outputs. The
+build rejects skip-notarization flags for app shell and installer package
+artifacts.

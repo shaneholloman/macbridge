@@ -53,7 +53,12 @@ export async function buildEntrypoint(
     "false",
   ]);
 
-  await run(log, ["cp", "-R", `${typesDir}/.`, paths.dist.root]);
+  const sourceTypesDir = join(typesDir, "src");
+  const sourceEntrypointTypes = join(sourceTypesDir, "index.d.ts");
+  if (!(await Bun.file(sourceEntrypointTypes).exists())) {
+    throw new Error(`Type declaration preflight did not produce ${sourceEntrypointTypes}`);
+  }
+  await run(log, ["cp", "-R", `${sourceTypesDir}/.`, paths.dist.root]);
   await removePath(typesDir);
 
   const jsPath = join(paths.dist.root, "index.js");

@@ -1,8 +1,8 @@
-import type { RunSummary, Step } from "./types.ts";
-
-const runsDir = "soak/runs";
+import { soakRoot } from "./paths.js";
+import type { RunSummary, Step } from "./types.js";
 
 export async function readHistory(): Promise<RunSummary[]> {
+  const runsDir = `${soakRoot()}/runs`;
   const proc = Bun.spawnSync({
     cmd: ["find", runsDir, "-mindepth", "2", "-maxdepth", "2", "-name", "summary.json"],
     stdin: "ignore",

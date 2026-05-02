@@ -5,7 +5,7 @@ status: Implemented
 owners:
     - MacBridge maintainers
 created: 2026-05-02
-updated: 2026-05-02
+updated: 2026-05-03
 supersedes: []
 superseded_by: null
 ---
@@ -16,8 +16,9 @@ superseded_by: null
 
 MacBridge should automatically regenerate aggregate soak reports after every
 completed soak run. Per-run files remain the durable evidence ledger, while
-`soak/reports/latest.md`, `soak/reports/latest.json`, and a libSQL index provide
-current cross-run statistics without requiring a separate user command.
+`~/macbridge/soak/reports/latest.md`,
+`~/macbridge/soak/reports/latest.json`, and a libSQL index provide current
+cross-run statistics without requiring a separate user command.
 
 ## Context
 
@@ -35,9 +36,9 @@ than manually maintained.
 ## Goals
 
 - Automatically refresh aggregate reports after every completed soak run.
-- Write `soak/reports/latest.md` for humans.
-- Write `soak/reports/latest.json` for tools and future agents.
-- Add a libSQL index at `soak/reports/index.db`.
+- Write `~/macbridge/soak/reports/latest.md` for humans.
+- Write `~/macbridge/soak/reports/latest.json` for tools and future agents.
+- Add a libSQL index at `~/macbridge/soak/reports/index.db`.
 - Keep `summary.json` and `events.ndjson` as the source of truth.
 - Make the libSQL database rebuildable from files.
 - Avoid requiring a separate report command for normal use.
@@ -57,9 +58,9 @@ Each soak run should finish in this order:
 1. Write the run's `summary.json`.
 2. Write the run's `report.md`.
 3. Read all run summaries and step event ledgers.
-4. Write `soak/reports/latest.json`.
-5. Write `soak/reports/latest.md`.
-6. Rebuild or refresh `soak/reports/index.db`.
+4. Write `~/macbridge/soak/reports/latest.json`.
+5. Write `~/macbridge/soak/reports/latest.md`.
+6. Rebuild or refresh `~/macbridge/soak/reports/index.db`.
 
 The aggregate Markdown report should include:
 
@@ -108,7 +109,7 @@ steps(
 ```
 
 The database is an index. If it is deleted, the next soak run can rebuild it
-from `soak/runs`.
+from `~/macbridge/soak/runs`.
 
 ## Alternatives Considered
 
@@ -143,16 +144,17 @@ repair command.
 ## Compatibility Impact
 
 Existing run folders remain readable. The new aggregate files live under
-`soak/reports` and do not change CLI command names. The `soak:tui` command may
-continue scanning summaries directly or may consume aggregate JSON later.
+`~/macbridge/soak/reports` and do not change CLI command names. The `soak:tui`
+command may continue scanning summaries directly or may consume aggregate JSON
+later.
 
 ## Testing and Quality Gates
 
 - `bun run check:ts`
 - `bun run soak:smoke`
-- verify `soak/reports/latest.md`
-- verify `soak/reports/latest.json`
-- verify `soak/reports/index.db` exists and contains run/step rows
+- verify `~/macbridge/soak/reports/latest.md`
+- verify `~/macbridge/soak/reports/latest.json`
+- verify `~/macbridge/soak/reports/index.db` exists and contains run/step rows
 
 ## Rollout Plan
 

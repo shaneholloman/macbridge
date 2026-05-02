@@ -3,9 +3,9 @@ import {
   renderHistory,
   renderScoreChart,
   renderStepDurations,
-} from "./display.ts";
-import { recordingEvidence } from "./evidence.ts";
-import type { RunSummary } from "./types.ts";
+} from "./display.js";
+import { recordingEvidence } from "./evidence.js";
+import type { RunSummary } from "./types.js";
 
 function bytes(value: number): string {
   return value < 1024 ? `${value}B` : `${(value / 1024).toFixed(1)}KiB`;

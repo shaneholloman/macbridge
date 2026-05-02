@@ -53,7 +53,7 @@ export function packagedBin(): string | undefined {
     "MacBridge.app",
     "Contents",
     "MacOS",
-    "macbridge",
+    "macbridge-runtime",
   );
   if (existsSync(appBin)) return appBin;
 

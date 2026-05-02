@@ -5,7 +5,7 @@ This repository keeps product code and workflow code in separate places:
 - `src/`: TypeScript package, product CLI, agent harness, and SDK surface.
 - `native/swift/`: Swift Package Manager project for the native macOS adapter.
 - `build/`: checked-in build, package, release, RFC, and repository workflow code.
-- `soak/`: smoke, burn, stress, TUI, and aggregate reporting.
+- `soak/`: source for smoke, burn, stress, TUI, and aggregate reporting.
 - `docs/`: user, architecture, and development documentation.
 
 `tools/` must not exist. Product behavior belongs in `src/`; repository
@@ -50,7 +50,13 @@ capture smoke when Screen Recording permission is available.
 
 - `dist/`: generated package artifacts, manifests, and npm tarballs.
 - `tmp/`: local scratch space.
-- `soak/runs/` and `soak/reports/`: generated soak evidence and reports.
+- `~/macbridge/soak/runs/`: durable local soak run evidence.
+- `~/macbridge/soak/reports/`: durable local aggregate soak reports and index.
+
+Generated soak state lives outside the repository so the native app, npm CLI,
+and Bun development commands all read the same ledger. Set
+`MACBRIDGE_SOAK_ROOT` only when a test or advanced workflow needs an isolated
+run store.
 
 Generated artifacts are local and ignored.
 

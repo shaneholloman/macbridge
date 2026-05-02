@@ -204,7 +204,7 @@ async function stageApp(
   ];
 }
 
-async function appInfoPlist(target: NativeTarget): Promise<string> {
+async function appInfoPlist(_target: NativeTarget): Promise<string> {
   const pkg = JSON.parse(await Bun.file("package.json").text()) as { version: string };
   const executable = "macbridge";
   return `<?xml version="1.0" encoding="UTF-8"?>

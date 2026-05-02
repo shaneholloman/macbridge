@@ -1,5 +1,6 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import { runSoakCLI } from "../../soak/src/cli.js";
 import {
   agentCommandUsage,
   formatModels,
@@ -11,6 +12,7 @@ import {
   runPlanCommand,
 } from "../agent/command.js";
 import { createControlPlane } from "../core/client.js";
+import { defaultBin } from "../native/macbridge.js";
 import {
   outlookObserveUsage,
   parseOutlookObserveArgs,
@@ -31,26 +33,66 @@ type IO = {
   stderr: Pick<typeof process.stderr, "write">;
 };
 
-const productCommands = new Set(["act", "agent", "observe", "verify"]);
+const adapterCommands = new Set([
+  "active-window",
+  "background",
+  "capture",
+  "click",
+  "cursor",
+  "cursor-daemon",
+  "displays",
+  "doctor",
+  "double-click",
+  "drag",
+  "foreground-app",
+  "foreground-desktop",
+  "foreground-display",
+  "help",
+  "hotkey",
+  "list-apps",
+  "list-displays",
+  "list-windows",
+  "permissions",
+  "press",
+  "right-click",
+  "screenshot",
+  "scroll",
+  "service",
+  "setup",
+  "type",
+  "windows",
+]);
 
 export function isTypeScriptCommand(command: string | undefined): boolean {
-  return command != null && productCommands.has(command);
+  return command != null;
 }
 
 export async function runCLI(args = process.argv.slice(2), io: IO = process): Promise<number> {
   try {
     const command = args[0];
     switch (command) {
+      case undefined:
+      case "-h":
+      case "--help":
+      case "help":
+        io.stdout.write(`${usage()}\n`);
+        return 0;
       case "act":
         return await runAct(args.slice(1), io);
       case "agent":
         return await runAgent(args.slice(1), io);
       case "observe":
         return await runObserve(args.slice(1), io);
+      case "report":
+      case "reports":
+        return await runReports(args.slice(1), io);
+      case "soak":
+        return await runSoakCLI(args.slice(1), io);
       case "verify":
         return runVerify(args.slice(1), io);
       default:
-        io.stderr.write(`unknown TypeScript command: ${command ?? ""}\n`);
+        if (adapterCommands.has(command)) return runNativeAdapterCommand(args, io);
+        io.stderr.write(`unknown command: ${command}\n${usage()}\n`);
         return 1;
     }
   } catch (error) {
@@ -64,6 +106,51 @@ export async function runCLI(args = process.argv.slice(2), io: IO = process): Pr
     io.stderr.write(`${message}\n`);
     return 1;
   }
+}
+
+function usage(): string {
+  return [
+    "MacBridge",
+    "",
+    "usage:",
+    "  macbridge setup",
+    "  macbridge doctor",
+    "  macbridge permissions check --prompt",
+    "  macbridge reports",
+    "  macbridge soak tui",
+    "  macbridge soak smoke",
+    "  macbridge windows list",
+    "  macbridge displays list",
+    "  macbridge capture display main --png -o display.png",
+    "  macbridge observe desktop",
+    "  macbridge act <action.json>",
+    "  macbridge agent models",
+    "",
+    "MacBridge routes user commands through TypeScript. Native macOS work is delegated to the bundled adapter.",
+  ].join("\n");
+}
+
+function runNativeAdapterCommand(args: string[], io: IO): number {
+  const result = Bun.spawnSync({
+    cmd: [defaultBin, ...args],
+    stdin: "inherit",
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const stdout = result.stdout.toString();
+  const stderr = result.stderr.toString();
+  if (stdout !== "") io.stdout.write(stdout);
+  if (stderr !== "") io.stderr.write(stderr);
+  return result.exitCode;
+}
+
+async function runReports(args: string[], io: IO): Promise<number> {
+  const command = args[0] ?? "latest";
+  if (command === "latest" || command === "tui") {
+    return await runSoakCLI(["tui"], io);
+  }
+  io.stderr.write("usage: macbridge reports [latest|tui]\n");
+  return 1;
 }
 
 async function runAct(args: string[], io: IO): Promise<number> {

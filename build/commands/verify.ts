@@ -56,7 +56,7 @@ export async function verify(args: string[] = []): Promise<void> {
       'const parsedVerify = parseVerifyCommand(["expectation.json"]);',
       "const modelText = formatModels(parsedModels, []);",
       'if (!isTypeScriptCommand("observe")) throw new Error("observe command not routed");',
-      'if (isTypeScriptCommand("permissions")) throw new Error("native command was routed");',
+      'if (!isTypeScriptCommand("permissions")) throw new Error("permissions should enter the TypeScript command router");',
       'const verification = verifyExpectation({ type: "artifact", path: "consumer.ts" });',
       'if (typeof defaultBin !== "string") throw new Error("defaultBin");',
       'if (packagedBin() == null) throw new Error("packagedBin");',

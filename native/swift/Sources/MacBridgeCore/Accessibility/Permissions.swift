@@ -34,7 +34,11 @@ func permissionReport(prompt: Bool = false) -> [String: Any] {
 }
 
 func runPermissionsSubcommand(cursor: inout ArgumentCursor) throws {
-    guard !cursor.args.isEmpty else { throw CUAError.usage("permissions needs a command") }
+    guard !cursor.args.isEmpty else {
+        var setup = ArgumentCursor(args: ["check", "--prompt"])
+        try runPermissionsSubcommand(cursor: &setup)
+        return
+    }
     let command = try cursor.pop()
     switch command {
     case "check":
