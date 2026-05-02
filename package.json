@@ -1,0 +1,126 @@
+{
+  "name": "macbridge",
+  "version": "0.1.0",
+  "private": false,
+  "description": "TypeScript-friendly native macOS automation adapter.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "macbridge": "./dist/bin/macbridge"
+  },
+  "files": [
+    "dist/agent/*.d.ts",
+    "dist/app/darwin-arm64/MacBridge.app",
+    "dist/app/darwin-x64/MacBridge.app",
+    "dist/bin/macbridge",
+    "dist/bin/macbridge-darwin-arm64",
+    "dist/bin/macbridge-darwin-x64",
+    "dist/build/latest.json",
+    "dist/build/logs/commands.jsonl",
+    "dist/build/manifests/*.json",
+    "dist/build/package-contract.json",
+    "dist/build/security/*.json",
+    "dist/build/timings/commands.jsonl",
+    "dist/cli/*.d.ts",
+    "dist/core/*.d.ts",
+    "dist/index.d.ts",
+    "dist/index.js",
+    "dist/media/*.d.ts",
+    "dist/native/*.d.ts",
+    "dist/observe/*.d.ts",
+    "dist/observe/targets/*.d.ts",
+    "dist/protocol/*.d.ts",
+    "docs/usage.md",
+    "docs/cli.md",
+    "docs/development/repository.md",
+    "docs/development/rfcs/README.md",
+    "docs/development/rfcs/index.md",
+    "docs/development/rfcs/rfc-0007-app-identity-and-icon-distribution.md",
+    "docs/development/rfcs/rfc-0008-model-agnostic-agent-loop.md",
+    "docs/development/rfcs/rfc-0010-multimodal-evidence-and-session-video.md",
+    "docs/development/rfcs/implemented/README.md",
+    "docs/development/rfcs/implemented/rfc-0001-swift-package-structure-and-semantics.md",
+    "docs/development/rfcs/implemented/rfc-0002-soak-regime-and-run-ledger.md",
+    "docs/development/rfcs/implemented/rfc-0003-execution-waterfall-reporting.md",
+    "docs/development/rfcs/implemented/rfc-0004-aggregate-soak-reporting-and-indexing.md",
+    "docs/development/rfcs/implemented/rfc-0005-npm-package-delivery.md",
+    "docs/development/rfcs/implemented/rfc-0006-apple-distribution-signing-and-notarization.md",
+    "docs/development/rfcs/implemented/rfc-0009-public-typescript-api-and-cli-semantics.md",
+    "README.md"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64",
+    "x64"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shaneholloman/macbridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shaneholloman/macbridge/issues"
+  },
+  "homepage": "https://github.com/shaneholloman/macbridge#readme",
+  "keywords": [
+    "macos",
+    "automation",
+    "agent",
+    "accessibility",
+    "screencapturekit"
+  ],
+  "packageManager": "bun@1.3.12",
+  "engines": {
+    "node": ">=20",
+    "bun": ">=1.3.12"
+  },
+  "scripts": {
+    "build:native": "swift build -c release --package-path native/swift --scratch-path tmp/swiftpm",
+    "build:release-native": "bun build/cli.ts native",
+    "build:release": "bun build/cli.ts release",
+    "build:dist": "bun build/cli.ts dist",
+    "check": "bun run check:ts && bun run build:native && bun run test:native",
+    "test:native": "swift test --package-path native/swift --scratch-path tmp/swiftpm",
+    "check:ts": "bun x biome check src soak/src build package.json tsconfig.json biome.json && bun x tsc --noEmit && bun test ./src/**/*.test.ts ./soak/src/*.test.ts && bun run source:check && bun run report:check && bun run rfc:check",
+    "check:pack": "bun build/cli.ts verify",
+    "format": "bun x biome format --write src soak/src build package.json tsconfig.json biome.json",
+    "lint": "bun x biome lint src soak/src build package.json tsconfig.json biome.json",
+    "pack:npm": "bun build/cli.ts pack",
+    "rfc:check": "bun build/rfc.ts check",
+    "rfc:sync": "bun build/rfc.ts sync",
+    "source:check": "bun build/source-boundary.ts",
+    "report:check": "bun soak/src/capabilities.ts",
+    "agent": "bun src/cli/main.ts agent",
+    "observe": "bun src/cli/main.ts observe",
+    "act": "bun src/cli/main.ts act",
+    "verify": "bun src/cli/main.ts verify",
+    "soak:burn": "bun soak/src/cli.ts burn",
+    "soak:smoke": "bun soak/src/cli.ts smoke",
+    "soak:stress": "bun soak/src/cli.ts stress",
+    "soak:stress:helium": "bun soak/src/cli.ts stress --live-helium",
+    "soak:stress:live": "bun soak/src/cli.ts stress --live-textedit",
+    "soak:burn:helium": "bun soak/src/cli.ts burn --live-helium",
+    "soak:tui": "bun soak/src/cli.ts tui",
+    "typecheck": "bun x tsc --noEmit"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.14",
+    "@types/bun": "^1.3.13",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.1.1",
+    "typescript": "^5.9.0"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.3",
+    "mediabunny": "^1.43.0",
+    "zod": "^4.4.2"
+  }
+}

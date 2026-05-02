@@ -1,0 +1,158 @@
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
+import {
+  agentCommandUsage,
+  formatModels,
+  modelsCommand,
+  parseModelsArgs,
+  parsePlanArgs,
+  parseRunArgs,
+  planCommand,
+  runPlanCommand,
+} from "../agent/command.js";
+import { createControlPlane } from "../core/client.js";
+import {
+  outlookObserveUsage,
+  parseOutlookObserveArgs,
+  runOutlookObserve,
+} from "../observe/targets/outlook.js";
+import {
+  CommandUsageError,
+  parseActCommand,
+  parseObserveCommand,
+  parseVerifyCommand,
+  runActCommand,
+  runObserveCommand,
+  runVerifyCommand,
+} from "./command.js";
+
+type IO = {
+  stdout: Pick<typeof process.stdout, "write">;
+  stderr: Pick<typeof process.stderr, "write">;
+};
+
+const productCommands = new Set(["act", "agent", "observe", "verify"]);
+
+export function isTypeScriptCommand(command: string | undefined): boolean {
+  return command != null && productCommands.has(command);
+}
+
+export async function runCLI(args = process.argv.slice(2), io: IO = process): Promise<number> {
+  try {
+    const command = args[0];
+    switch (command) {
+      case "act":
+        return await runAct(args.slice(1), io);
+      case "agent":
+        return await runAgent(args.slice(1), io);
+      case "observe":
+        return await runObserve(args.slice(1), io);
+      case "verify":
+        return runVerify(args.slice(1), io);
+      default:
+        io.stderr.write(`unknown TypeScript command: ${command ?? ""}\n`);
+        return 1;
+    }
+  } catch (error) {
+    if (error instanceof CommandUsageError) {
+      io.stderr.write(
+        error.usage == null ? `${error.message}\n` : `${error.message}\n${error.usage}\n`,
+      );
+      return 1;
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    io.stderr.write(`${message}\n`);
+    return 1;
+  }
+}
+
+async function runAct(args: string[], io: IO): Promise<number> {
+  const parsed = parseActCommand(args);
+  if (parsed.kind === "help") {
+    io.stdout.write(`${parsed.usage}\n`);
+    return 0;
+  }
+
+  const result = await runActCommand(parsed.options, createControlPlane());
+  io.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  return result.status === "pass" ? 0 : 1;
+}
+
+async function runAgent(args: string[], io: IO): Promise<number> {
+  const command = args[0];
+  if (command == null || command === "-h" || command === "--help") {
+    io.stdout.write(`${agentCommandUsage()}\n`);
+    return 0;
+  }
+
+  switch (command) {
+    case "models": {
+      const options = parseModelsArgs(args.slice(1));
+      io.stdout.write(formatModels(options, modelsCommand(options)));
+      return 0;
+    }
+    case "plan": {
+      const options = parsePlanArgs(args.slice(1));
+      await writeJSON(options.out, await planCommand(options), io);
+      return 0;
+    }
+    case "run": {
+      const options = parseRunArgs(args.slice(1));
+      await writeJSON(options.out, await runPlanCommand(options), io);
+      return 0;
+    }
+    default:
+      io.stderr.write(`unknown agent command: ${command}\n${agentCommandUsage()}\n`);
+      return 1;
+  }
+}
+
+async function runObserve(args: string[], io: IO): Promise<number> {
+  if (args[0] === "outlook") {
+    const targetArgs = args.slice(1);
+    if (targetArgs[0] === "-h" || targetArgs[0] === "--help") {
+      io.stdout.write(`${outlookObserveUsage()}\n`);
+      return 0;
+    }
+    const output = await runOutlookObserve(parseOutlookObserveArgs(targetArgs));
+    io.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
+    return 0;
+  }
+
+  const parsed = parseObserveCommand(args);
+  if (parsed.kind === "help") {
+    io.stdout.write(`${parsed.usage}\n`);
+    return 0;
+  }
+
+  const output = await runObserveCommand(parsed.options, createControlPlane());
+  io.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
+  return 0;
+}
+
+function runVerify(args: string[], io: IO): number {
+  const parsed = parseVerifyCommand(args);
+  if (parsed.kind === "help") {
+    io.stdout.write(`${parsed.usage}\n`);
+    return 0;
+  }
+
+  const result = runVerifyCommand(parsed.options, createControlPlane());
+  io.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  return result.status === "pass" ? 0 : 1;
+}
+
+async function writeJSON(path: string | undefined, value: unknown, io: IO): Promise<void> {
+  const text = `${JSON.stringify(value, null, 2)}\n`;
+  if (path == null || path === "-") {
+    io.stdout.write(text);
+    return;
+  }
+  mkdirSync(dirname(path), { recursive: true });
+  await Bun.write(path, text);
+  io.stdout.write(`${path}\n`);
+}
+
+if (import.meta.main) {
+  process.exit(await runCLI());
+}
