@@ -12,16 +12,16 @@ import { runGhosttyPackaging } from "./ghostty/cli.ts";
 function usage(): string {
   return [
     "usage:",
-    "  bun build/cli.ts app [--target darwin-arm64|darwin-x64] [--from-dist]",
-    "  bun build/cli.ts dist [--target darwin-arm64|darwin-x64]",
-    "  bun build/cli.ts native [--target darwin-arm64|darwin-x64]",
-    "  bun build/cli.ts pack [--target darwin-arm64|darwin-x64] [--from-dist] [--require-signed]",
-    "  bun build/cli.ts pkg [--target darwin-arm64|darwin-x64] --from-dist",
-    "  bun build/cli.ts verify [--target darwin-arm64|darwin-x64] [--from-dist] [--require-signed]",
-    "  bun build/cli.ts release [--target darwin-arm64|darwin-x64]",
-    "  bun build/cli.ts shell [--target=darwin-arm64|darwin-x64] [--latest-ghostty] [--skip-build]",
+    "  bun build/cli.ts app [--target darwin-arm64] [--from-dist]",
+    "  bun build/cli.ts dist [--target darwin-arm64]",
+    "  bun build/cli.ts native [--target darwin-arm64]",
+    "  bun build/cli.ts pack [--target darwin-arm64] [--from-dist] [--require-signed]",
+    "  bun build/cli.ts pkg [--target darwin-arm64] --from-dist",
+    "  bun build/cli.ts verify [--target darwin-arm64] [--from-dist] [--require-signed]",
+    "  bun build/cli.ts release [--target darwin-arm64]",
+    "  bun build/cli.ts shell [--target=darwin-arm64] [--latest-ghostty] [--skip-build]",
     "  bun build/cli.ts tcc-reset [--dry-run] [--legacy-only] [--keep-installed-apps] [--tcc-only]",
-    "  bun build/cli.ts apple sign|sign-app|notarize|notarize-app|verify [--target darwin-arm64|darwin-x64]",
+    "  bun build/cli.ts apple sign|sign-app|notarize|notarize-app|verify [--target darwin-arm64]",
   ].join("\n");
 }
 

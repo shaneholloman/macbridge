@@ -18,13 +18,9 @@ const SYSTEM_TCC_DB = "/Library/Application Support/com.apple.TCC/TCC.db";
 const STALE_LAUNCH_SERVICES_PATHS = [
   "/Applications/MacBridge.app",
   join(ROOT, "dist/app/darwin-arm64/MacBridge.app"),
-  join(ROOT, "dist/app/darwin-x64/MacBridge.app"),
   join(ROOT, "dist/darwin-arm64/MacBridge.app"),
-  join(ROOT, "dist/darwin-x64/MacBridge.app"),
   join(ROOT, "dist/pkg/darwin-arm64/payload/Applications/MacBridge.app"),
-  join(ROOT, "dist/pkg/darwin-x64/payload/Applications/MacBridge.app"),
   join(ROOT, "tmp/package-consumer/node_modules/macbridge/dist/app/darwin-arm64/MacBridge.app"),
-  join(ROOT, "tmp/package-consumer/node_modules/macbridge/dist/app/darwin-x64/MacBridge.app"),
   join(ROOT, "tmp/ghostty/macos/build/ReleaseLocal/MacBridge.app"),
   join(
     ROOT,
@@ -52,7 +48,6 @@ const INSTALLED_MACBRIDGE_PATHS = [
   `${process.env.HOME ?? ""}/.Trash/darwin-arm64`,
   `${process.env.HOME ?? ""}/.Trash/ghostty`,
   join(ROOT, "dist/pkg/darwin-arm64/payload/Applications/MacBridge.app"),
-  join(ROOT, "dist/pkg/darwin-x64/payload/Applications/MacBridge.app"),
   join(ROOT, "tmp/ghostty/macos/build/ReleaseLocal/MacBridge.app"),
   join(ROOT, "tmp/ghostty/macos/build/ReleaseLocal/MacBridgeShell.app"),
 ].filter((path) => path.length > 0);

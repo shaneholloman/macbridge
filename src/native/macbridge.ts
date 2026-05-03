@@ -33,9 +33,6 @@ export function devNativeBin(): string {
   if (process.platform === "darwin" && process.arch === "arm64") {
     return "tmp/swiftpm/arm64-apple-macosx/release/macbridge";
   }
-  if (process.platform === "darwin" && process.arch === "x64") {
-    return "tmp/swiftpm/x86_64-apple-macosx/release/macbridge";
-  }
   return "tmp/swiftpm/release/macbridge";
 }
 
@@ -43,13 +40,13 @@ export const devBin = devNativeBin();
 
 export function packagedBin(): string | undefined {
   if (process.platform !== "darwin") return undefined;
-  if (process.arch !== "arm64" && process.arch !== "x64") return undefined;
+  if (process.arch !== "arm64") return undefined;
 
   const base = dirname(fileURLToPath(import.meta.url));
   const appBin = join(
     base,
-    "app",
-    `darwin-${process.arch}`,
+    "..",
+    "darwin-arm64",
     "MacBridge.app",
     "Contents",
     "MacOS",
@@ -57,7 +54,7 @@ export function packagedBin(): string | undefined {
   );
   if (existsSync(appBin)) return appBin;
 
-  const standalone = join(base, "bin", `macbridge-darwin-${process.arch}`);
+  const standalone = join(base, "..", "bin", "macbridge-darwin-arm64");
   return existsSync(standalone) ? standalone : undefined;
 }
 
