@@ -37,23 +37,7 @@ const basePackageFiles = [
   "package/docs/development/rfcs/rfc-0008-model-agnostic-agent-loop.md",
   "package/docs/development/rfcs/rfc-0010-multimodal-evidence-and-session-video.md",
   "package/docs/usage.md",
-  "package/dist/darwin-arm64/MacBridge.app/Contents/Info.plist",
-  "package/dist/darwin-arm64/MacBridge.app/Contents/MacOS/macbridge",
-  "package/dist/darwin-arm64/MacBridge.app/Contents/MacOS/macbridge-launch",
-  "package/dist/darwin-arm64/MacBridge.app/Contents/MacOS/macbridge-runtime",
-  "package/dist/darwin-arm64/MacBridge.app/Contents/Resources/MacBridge.icns",
-  "package/dist/darwin-arm64/MacBridge.app/Contents/Resources/macbridge-cli.js",
-  "package/dist/darwin-arm64/MacBridge.app/Contents/Resources/macbridge-icon.png",
-  "package/dist/darwin-x64/MacBridge.app/Contents/Info.plist",
-  "package/dist/darwin-x64/MacBridge.app/Contents/MacOS/macbridge",
-  "package/dist/darwin-x64/MacBridge.app/Contents/MacOS/macbridge-launch",
-  "package/dist/darwin-x64/MacBridge.app/Contents/MacOS/macbridge-runtime",
-  "package/dist/darwin-x64/MacBridge.app/Contents/Resources/MacBridge.icns",
-  "package/dist/darwin-x64/MacBridge.app/Contents/Resources/macbridge-cli.js",
-  "package/dist/darwin-x64/MacBridge.app/Contents/Resources/macbridge-icon.png",
   "package/dist/bin/macbridge",
-  "package/dist/bin/macbridge-darwin-arm64",
-  "package/dist/bin/macbridge-darwin-x64",
   "package/dist/build/latest.json",
   "package/dist/build/logs/commands.jsonl",
   "package/dist/build/package-contract.json",
@@ -79,19 +63,9 @@ const basePackageFiles = [
   "package/dist/protocol/types.d.ts",
 ];
 
-const notarizedPackageFiles = [
-  "package/dist/darwin-arm64/MacBridge.app/Contents/_CodeSignature/CodeResources",
-  "package/dist/darwin-x64/MacBridge.app/Contents/_CodeSignature/CodeResources",
-  "package/dist/build/security/MacBridge-darwin-arm64.app.notary.json",
-  "package/dist/build/security/MacBridge-darwin-x64.app.notary.json",
-  "package/dist/build/security/macbridge-darwin-arm64.notary.json",
-  "package/dist/build/security/macbridge-darwin-x64.notary.json",
-];
+const notarizedPackageFiles: string[] = [];
 
-const optionalPackageFiles = [
-  "package/dist/darwin-arm64/MacBridge.app/Contents/CodeResources",
-  "package/dist/darwin-x64/MacBridge.app/Contents/CodeResources",
-];
+const optionalPackageFiles: string[] = [];
 
 export const forbiddenPackagePathParts = [
   ".DS_Store",
@@ -151,14 +125,17 @@ export function assertPackageContents(
     throw new Error("expected at least one build manifest");
   }
   const pkgNotaryEvidenceFiles = files.filter((file) =>
-    /^package\/dist\/build\/security\/macbridge-[^/]+-darwin-(arm64|x64)\.pkg\.notary\.json$/.test(
-      file,
-    ),
+    /^package\/dist\/build\/security\/macbridge-[^/]+-darwin-arm64\.pkg\.notary\.json$/.test(file),
   );
-  if (options.notarized === true && pkgNotaryEvidenceFiles.length !== 2) {
-    throw new Error("expected notarized pkg evidence for both macOS targets");
+  const pkgInstallerFiles = files.filter((file) =>
+    /^package\/dist\/pkg\/macbridge-[^/]+-darwin-arm64\.pkg$/.test(file),
+  );
+  if (pkgInstallerFiles.length !== 1) {
+    throw new Error("expected exactly one darwin-arm64 installer pkg in npm payload");
   }
-
+  if (options.notarized === true && pkgNotaryEvidenceFiles.length !== 1) {
+    throw new Error("expected notarized pkg evidence for darwin-arm64");
+  }
   for (const file of files) {
     for (const part of forbiddenPackagePathParts) {
       if (file.includes(part)) {
@@ -171,6 +148,7 @@ export function assertPackageContents(
     ...expectedPackageFiles,
     ...optionalPackageFiles,
     ...manifestFiles,
+    ...pkgInstallerFiles,
     ...pkgNotaryEvidenceFiles,
   ]);
   for (const file of files) {

@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { parseTargets } from "../native/swift.ts";
 import { createBuildLog } from "../runtime/log.ts";
@@ -6,6 +7,12 @@ import { paths } from "../runtime/paths.ts";
 import { ensureDir, fileSHA256, removePath, run } from "../runtime/runner.ts";
 import { appleConfig, requireInstallerIdentity, requireNotaryProfile } from "./config.ts";
 import { LEGACY_MACBRIDGE_BUNDLE_IDS, MACBRIDGE_BUNDLE_ID } from "./identity.ts";
+
+async function resolvePackagedAppPath(targetId: string): Promise<string> {
+  const directPath = join(paths.dist.root, targetId, "MacBridge.app");
+  if (existsSync(directPath)) return directPath;
+  throw new Error(`missing shell MacBridge.app for ${targetId}: run bun build/cli.ts shell first`);
+}
 
 export async function pkg(args: string[] = []): Promise<void> {
   const fromDist = args.includes("--from-dist");
@@ -31,7 +38,8 @@ export async function pkg(args: string[] = []): Promise<void> {
   };
 
   for (const target of targets) {
-    const app = join(paths.dist.root, target.id, "MacBridge.app");
+    await removePath(join(paths.dist.pkg, `macbridge-${target.id}.pkg`));
+    const app = await resolvePackagedAppPath(target.id);
     const pkgRoot = join(paths.dist.pkg, target.id);
     const payload = join(pkgRoot, "payload");
     const scripts = join(pkgRoot, "scripts");

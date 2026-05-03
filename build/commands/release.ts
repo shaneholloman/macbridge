@@ -1,7 +1,6 @@
-import { sign, signApps } from "../apple/codesign.ts";
-import { notarize, notarizeApps } from "../apple/notary.ts";
-import { verifyApple } from "../apple/verify.ts";
-import { app } from "./app.ts";
+import { sign } from "../apple/codesign.ts";
+import { notarize } from "../apple/notary.ts";
+import { runGhosttyPackaging } from "../ghostty/cli.ts";
 import { dist } from "./dist.ts";
 import { pkg } from "./pkg.ts";
 import { verify } from "./verify.ts";
@@ -9,11 +8,16 @@ import { verify } from "./verify.ts";
 export async function release(args: string[] = []): Promise<void> {
   await dist(args);
   await sign(args);
-  await app([...args, "--from-dist"]);
-  await signApps(args);
   await notarize(args);
-  await notarizeApps(args);
-  await verifyApple(args);
+  await runGhosttyPackaging(toShellArgs(args));
   await pkg([...args, "--from-dist"]);
   await verify([...args, "--from-dist", "--require-signed"]);
+}
+
+function toShellArgs(args: string[]): string[] {
+  const targetIndex = args.indexOf("--target");
+  if (targetIndex === -1) return [];
+  const target = args[targetIndex + 1];
+  if (target == null || target.length === 0) return [];
+  return [`--target=${target}`];
 }
