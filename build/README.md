@@ -23,9 +23,8 @@ bun build/cli.ts apple verify
 
 `dist` builds the TypeScript entrypoint, emits declarations, generates the npm
 CLI launcher, builds and stages native binaries, generates `MacBridge.icns`,
-assembles target-specific `MacBridge.app` bundles, and writes a build manifest.
-By default it stages both `darwin-arm64` and `darwin-x64`; pass `--target` for
-a single architecture during local iteration.
+assembles the Apple Silicon `MacBridge.app` bundle, and writes a build manifest.
+The supported target is `darwin-arm64`.
 
 `app` rebuilds the app bundles. Without `--from-dist`, it delegates to `dist`.
 With `--from-dist`, it reuses the staged native binaries; this is used by
@@ -34,8 +33,8 @@ release signing so the app bundle receives the signed native executable.
 `pack` runs `dist`, creates the npm tarball, records package contents, and
 updates the manifest.
 
-`pkg --from-dist` builds a signed and notarized macOS installer package for
-each target. The installer places `MacBridge.app` in `/Applications` and a
+`pkg --from-dist` builds a signed and notarized Apple Silicon macOS installer
+package. The installer places `MacBridge.app` in `/Applications` and a
 small `macbridge` shim in `/usr/local/bin`.
 
 `verify` runs `pack`, installs the tarball into a temporary consumer project,

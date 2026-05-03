@@ -41,7 +41,7 @@ bun run check:pack
 bun run test:native
 ```
 
-`check:pack` builds both macOS architecture binaries, packs the npm tarball,
+`check:pack` builds the Apple Silicon macOS binary, packs the npm tarball,
 installs it into a temporary consumer project, imports the package with Node,
 type-checks a TypeScript consumer, runs the installed CLI, and performs a
 capture smoke when Screen Recording permission is available.

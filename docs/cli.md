@@ -4,18 +4,24 @@ The public CLI is named `macbridge`. It routes TypeScript-owned commands such
 as `agent`, `observe`, `act`, and `verify`, and forwards native macOS commands
 to the Swift runtime.
 
-For one-off native usage, prefer npm's executable path:
+For a new machine, npm is the bootstrap path:
 
 ```bash
-npx macbridge --help
-npx macbridge displays list
+npx macbridge
 ```
 
-On macOS, the npm wrapper prefers the native executable inside the packaged
-`MacBridge.app` bundle. That keeps the CLI install path while giving permission
-prompts and System Settings a clearer app identity.
+On macOS, that command runs the packaged signed `.pkg` installer and then opens
+`/Applications/MacBridge.app`. Accessibility and Screen Recording should be
+granted to that installed app, not to an npm cache path.
 
-For TypeScript harness commands, use Bun:
+After the app is installed, use the normal command surface:
+
+```bash
+macbridge displays list
+macbridge permissions check --prompt
+```
+
+For TypeScript harness commands during development, use Bun:
 
 ```bash
 bunx macbridge observe desktop --display-screenshot main

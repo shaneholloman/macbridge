@@ -12,16 +12,16 @@ higher-level SDK shape is still evolving before the first stable release.
 ## Run
 
 ```bash
+npx macbridge
 npx macbridge --help
 npx macbridge permissions check
 npx macbridge displays list
 ```
 
-MacBridge currently targets macOS on `arm64` and `x64`. The npm package carries
-target-specific `MacBridge.app` bundles with the project icon and bundle
-metadata; native commands prefer the app-bundled Swift executable so macOS
-permission prompts have a clearer product identity. TypeScript harness commands
-such as `observe`, `act`, `verify`, and `agent` use Bun.
+MacBridge currently targets Apple Silicon Macs only. Running `npx macbridge`
+uses the packaged signed `.pkg` installer, then opens
+`/Applications/MacBridge.app` so macOS permission prompts attach to the stable
+app identity.
 
 ## Install
 
@@ -29,8 +29,9 @@ such as `observe`, `act`, `verify`, and `agent` use Bun.
 bun add macbridge
 ```
 
-Double-clicking the bundled app opens a small MacBridge permission window, while
-developer workflows can keep using `npx macbridge`.
+Double-clicking the installed app opens the MacBridge shell and permission
+surface. After installation, developer workflows can use the `macbridge`
+command.
 
 ## Quick Start
 

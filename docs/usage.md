@@ -6,12 +6,13 @@ surface for agent-oriented automation.
 ## Run
 
 ```bash
+npx macbridge
 npx macbridge --help
 npx macbridge permissions check
 npx macbridge displays list
 ```
 
-The package is macOS-only and currently supports `arm64` and `x64`.
+The package is macOS-only and currently supports Apple Silicon Macs.
 
 ## Install
 
@@ -96,10 +97,9 @@ Use:
 macbridge permissions check
 ```
 
-The npm package includes `MacBridge.app` bundles for each supported macOS
-architecture. The CLI wrapper prefers the executable inside that bundle so
-Accessibility and Screen Recording prompts can use MacBridge's bundle identity
-and icon where macOS allows it.
+Running `npx macbridge` executes the packaged signed `.pkg` installer, then
+opens `/Applications/MacBridge.app`. Accessibility and Screen Recording prompts
+should use that installed app identity, not an npm cache path.
 
 Opening `MacBridge.app` directly shows a small native permission window. Use
 Terminal for CLI workflows only when you intentionally want a shell.

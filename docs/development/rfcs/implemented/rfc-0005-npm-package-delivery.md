@@ -27,14 +27,13 @@ Package delivery is implemented for local and signed release artifacts:
 - `src/index.ts` is the public TypeScript package entrypoint.
 - `dist/bin/macbridge` is a JavaScript npm launcher that selects the native
   binary by `process.platform` and `process.arch`.
-- `dist/bin/macbridge-darwin-arm64` and `dist/bin/macbridge-darwin-x64` are
-  staged by the build module.
+- `dist/bin/macbridge-darwin-arm64` is staged by the build module.
 - `bun run check:pack` packs the local package, validates package metadata and
   tarball contents, installs into a temporary consumer project, imports with
   Node, type-checks a TypeScript consumer, runs installed CLI commands, and
   performs a capture smoke when permissions are available.
-- `bun run build:release` builds both macOS targets, signs them with Developer
-  ID, notarizes them with Apple, verifies the signed binaries, packs from the
+- `bun run build:release` builds the Apple Silicon target, signs it with
+  Developer ID, notarizes it with Apple, verifies the signed binary, packs from the
   signed `dist`, and reruns package installation checks with signed artifacts
   required.
 - Package verification records metadata, tarball contents, checksums, logs,
@@ -127,20 +126,23 @@ The npm package should emit a compact distribution layout:
 dist/
   index.js
   index.d.ts
+  darwin-arm64/
+    MacBridge.app/
   bin/
     macbridge
     macbridge-darwin-arm64
-    macbridge-darwin-x64
   build/
     latest.json
     manifests/
     logs/
 ```
 
-`dist/bin/macbridge` should be a small JavaScript or shell-compatible launcher
-that chooses the correct native binary for `process.platform` and
-`process.arch`. The TypeScript wrapper should resolve the packaged binary by
-default, while still allowing callers to override the binary path.
+`dist/bin/macbridge` should be a small JavaScript launcher that chooses the
+correct app bundle for `process.platform` and `process.arch`. For a bare
+`npx macbridge`, it installs the bundled `MacBridge.app` into `/Applications`,
+registers it with Launch Services, writes `/usr/local/bin/macbridge`, and opens
+the app. For command invocations, it routes through the installed app runtime by
+default while still allowing callers to override the binary path.
 
 The package metadata should include:
 
@@ -152,7 +154,7 @@ The package metadata should include:
 - `bin`
 - `files`
 - `os: ["darwin"]`
-- `cpu: ["arm64", "x64"]`
+- `cpu: ["arm64"]`
 - `license`
 - `repository`
 - `bugs`

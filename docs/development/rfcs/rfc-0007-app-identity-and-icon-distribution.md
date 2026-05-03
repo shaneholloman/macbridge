@@ -74,7 +74,7 @@ Treat product identity as a staged distribution surface:
    - `CFBundleIconFile`: `MacBridge`
 4. Add target-specific `MacBridge.app` release artifacts under
    `dist/darwin-arm64/MacBridge.app` and
-   `dist/darwin-x64/MacBridge.app`.
+   `dist/darwin-arm64/MacBridge.app`.
 5. Embed or copy the signed native adapter into each app bundle at
    `Contents/MacOS/macbridge`. Keep the rebranded terminal host as the internal
    `Contents/MacOS/macbridge-shell` executable so the public `macbridge` name

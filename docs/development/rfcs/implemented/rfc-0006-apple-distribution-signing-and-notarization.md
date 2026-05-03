@@ -23,8 +23,8 @@ class build subsystem, not as ad hoc release commands.
 
 Apple distribution is implemented as a first-class build subsystem:
 
-- `bun build/cli.ts native` stages `darwin-arm64` and `darwin-x64` Swift
-  release binaries into `dist/bin`.
+- `bun build/cli.ts native` stages the `darwin-arm64` Swift release binary into
+  `dist/bin`.
 - `bun build/cli.ts apple sign` signs staged binaries with Developer ID and
   hardened runtime.
 - `bun build/cli.ts apple notarize` submits standalone binary archives with
@@ -58,7 +58,7 @@ results, not own the signing process.
 
 ## Goals
 
-- Build release binaries for `darwin-arm64` and `darwin-x64`.
+- Build release binaries for `darwin-arm64`.
 - Sign release binaries with a Developer ID Application identity.
 - Enable hardened runtime where appropriate.
 - Submit signed release artifacts to Apple's notary service with
@@ -107,7 +107,6 @@ Release artifacts should be staged into:
 dist/
   bin/
     macbridge-darwin-arm64
-    macbridge-darwin-x64
   build/
     latest.json
     manifests/
@@ -120,7 +119,6 @@ The build command should support a clear local/release split:
 
 ```bash
 bun build/cli.ts native --target darwin-arm64
-bun build/cli.ts native --target darwin-x64
 bun build/cli.ts apple sign --target darwin-arm64
 bun build/cli.ts apple notarize --target darwin-arm64
 bun build/cli.ts apple verify --target darwin-arm64
@@ -131,7 +129,7 @@ should not: Apple distribution belongs to the build module.
 
 Expected release flow:
 
-1. Build a Swift release binary for each target.
+1. Build a Swift release binary for the Apple Silicon target.
 2. Copy the binary into `dist/bin/macbridge-<target>`.
 3. Sign the binary with `codesign`.
 4. Verify the signature with `codesign --verify`.
@@ -222,10 +220,8 @@ public release.
 The first release targets are:
 
 - `darwin-arm64`
-- `darwin-x64`
 
-The npm package will choose the correct binary at runtime. Unsupported platforms
-should fail clearly before attempting native execution.
+Unsupported platforms should fail clearly before attempting native execution.
 
 If universal binaries are considered later, that decision should be captured in
 a follow-up RFC because it changes artifact size, build mechanics, and signing
@@ -235,7 +231,7 @@ expectations.
 
 - `bun run check`
 - `bun run soak:smoke`
-- build each supported target
+- build the supported Apple Silicon target
 - `codesign --verify --strict --verbose=2 <binary>`
 - inspect signature metadata with `codesign -dv --verbose=4 <binary>`
 - submit notarization upload with `xcrun notarytool`
@@ -261,11 +257,9 @@ expectations.
   or both?
   Decision: default to the saved keychain profile `aria-notarytool`, with
   `MACBRIDGE_NOTARY_PROFILE` and `MACBRIDGE_NOTARY_KEYCHAIN` overrides.
-- Should the npm package include only separate architecture binaries, or should
-  we eventually produce a universal binary?
-  Decision: ship separate `darwin-arm64` and `darwin-x64` binaries for npm.
-  Revisit universal binaries only if package size and runtime dispatch become
-  meaningful problems.
+- Should the npm package include Intel or universal binaries?
+  Decision: no. MacBridge supports Apple Silicon Macs only so package size,
+  build time, signing, and testing stay focused on the intended audience.
 - What entitlements, if any, are needed for the CLI under hardened runtime?
   Decision: no committed entitlements are needed for the current standalone CLI.
   Accessibility and Screen Recording are TCC grants, handled by
