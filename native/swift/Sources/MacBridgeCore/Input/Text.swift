@@ -54,17 +54,17 @@ func nsKeyPress(pid: pid_t, wid: CGWindowID, keycode: CGKeyCode, key: String, mo
     return true
 }
 
-func nsTypeText(pid: pid_t, wid: CGWindowID, text: String) -> Bool {
+func nsTypeText(pid: pid_t, wid: CGWindowID, text: String, keyHold: useconds_t = 15_000, keyGap: useconds_t = 10_000) -> Bool {
     var didType = false
     for character in text {
         guard let (code, needsShift) = keycodeForCharacter(character) else { return false }
         let modifiers = needsShift ? ["shift"] : []
-        if nsKeyPress(pid: pid, wid: wid, keycode: code, key: String(character), modifiers: modifiers, hold: 3_000) {
+        if nsKeyPress(pid: pid, wid: wid, keycode: code, key: String(character), modifiers: modifiers, hold: keyHold) {
             didType = true
         } else {
             return false
         }
-        usleep(1_000)
+        usleep(keyGap)
     }
     return didType || text.isEmpty
 }

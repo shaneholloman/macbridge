@@ -347,6 +347,24 @@ export class MacBridge implements ControlPlane {
           json = this.json<Json>(args);
           break;
         }
+        case "paste": {
+          const args = [
+            "background",
+            "paste",
+            windowTarget(parsedAction.target),
+            parsedAction.text,
+            "--any-window",
+          ];
+          if (parsedAction.at != null) {
+            args.push("--at", ...pointArgs(parsedAction.at));
+            pushCoord(args, parsedAction.at.coord);
+          }
+          if (parsedAction.activate) args.push("--activate");
+          if (parsedAction.submit) args.push("--submit");
+          if (parsedAction.preserveClipboard === false) args.push("--keep-clipboard");
+          json = this.json<Json>(args);
+          break;
+        }
         case "press": {
           const args = [
             "background",

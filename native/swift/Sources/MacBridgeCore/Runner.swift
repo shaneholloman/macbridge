@@ -68,7 +68,7 @@ public func run(_ arguments: [String]) throws {
         try printJSON(listDisplays().map(\.jsonObject))
     case "screenshot",
          "activate",
-         "click", "right-click", "double-click", "drag", "scroll", "type", "press", "hotkey":
+         "click", "right-click", "double-click", "drag", "scroll", "type", "paste", "press", "hotkey":
         cursor.args.insert(command, at: 0)
         try runBackgroundSubcommand(cursor: &cursor)
     default:

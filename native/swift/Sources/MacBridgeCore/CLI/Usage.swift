@@ -44,7 +44,8 @@ func usage() -> String {
       macbridge double-click <wid|app> <x> <y> [--coord pixel|normalized|global] [--any-window]
       macbridge drag <wid|app> <x1> <y1> <x2> <y2> [--duration 0.3] [--steps 20] [--coord pixel|normalized|global] [--any-window]
       macbridge scroll <wid|app> <x> <y> <dx> <dy> [--coord pixel|normalized|global] [--any-window]
-      macbridge type <wid|app> <text> [--at X Y] [--replace] [--coord pixel|normalized|global] [--any-window]
+      macbridge type <wid|app> <text> [--at X Y] [--replace] [--activate] [--key-hold-ms N] [--key-gap-ms N] [--coord pixel|normalized|global] [--any-window]
+      macbridge paste <wid|app> <text> [--at X Y] [--activate] [--submit] [--keep-clipboard] [--coord pixel|normalized|global] [--any-window]
       macbridge press <wid|app> <key> [--mod cmd]... [--any-window]
       macbridge hotkey <wid|app> <mod>... <key> [--any-window]
 
@@ -129,7 +130,12 @@ func usage() -> String {
                      scroll down; positive dx means scroll right. Prints {"via"}.
       type           With --at X Y, first targets that point. AX text insertion is
                      preferred because it handles Unicode and does not depend on
-                     keyboard layout. Falls back to ASCII CG keystrokes.
+                     keyboard layout. Falls back to synthetic keyboard events.
+                     Use --activate and slower key timing when a terminal drops
+                     background keystrokes.
+      paste          Sets clipboard text, sends Cmd+V, and optionally submits
+                     with Enter. This is the exact-text lane for long prompts.
+                     Clipboard text is restored by default.
       press/hotkey   Sends US-keyboard virtual-key events to the target PID.
       permissions    Checks macOS Accessibility and Screen Recording permission
                      state for the launching terminal/app or signed binary.
@@ -210,6 +216,8 @@ func usage() -> String {
       macbridge scroll 12345 600 500 0 700
       macbridge scroll 12345 600 500 0 -700
       macbridge type 12345 "hello world" --at 320 740
+      macbridge type 12345 "hello world" --activate --key-hold-ms 25 --key-gap-ms 15
+      macbridge paste 12345 "hello world" --activate --submit
       macbridge press 12345 Enter
       macbridge press 12345 ArrowDown
       macbridge press 12345 c --mod cmd

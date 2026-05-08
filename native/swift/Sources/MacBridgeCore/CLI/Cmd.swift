@@ -225,9 +225,34 @@ func runBackgroundSubcommand(cursor: inout ArgumentCursor) throws {
     case "type":
         let target = try cursor.pop()
         let text = try cursor.pop()
-        let (at, replace, coord, anyWindow) = try parseBackgroundTypeOptions(cursor: &cursor)
+        let (at, replace, coord, anyWindow, activate, keyHold, keyGap) = try parseBackgroundTypeOptions(cursor: &cursor)
         let wid = try resolveWindowTarget(target, anyWindow: anyWindow)
-        try printJSON(["via": typeText(wid: wid, text: text, at: at, coord: coord, replace: replace)])
+        try printJSON([
+            "via": typeText(
+                wid: wid,
+                text: text,
+                at: at,
+                coord: coord,
+                replace: replace,
+                activate: activate,
+                keyHold: keyHold,
+                keyGap: keyGap
+            )
+        ])
+    case "paste":
+        let target = try cursor.pop()
+        let text = try cursor.pop()
+        let (at, coord, anyWindow, activate, submit, preserveClipboard) = try parseBackgroundPasteOptions(cursor: &cursor)
+        let wid = try resolveWindowTarget(target, anyWindow: anyWindow)
+        try printJSON(pasteText(
+            wid: wid,
+            text: text,
+            at: at,
+            coord: coord,
+            activate: activate,
+            submit: submit,
+            preserveClipboard: preserveClipboard
+        ))
     case "ax-dump":
         let target = try cursor.pop()
         let x = try cursor.popDouble()
@@ -306,8 +331,31 @@ func runForegroundAppSubcommand(cursor: inout ArgumentCursor) throws {
         try printJSON(["via": scroll(wid: window.wid, x: x, y: y, dx: dx, dy: dy, coord: coord)])
     case "type":
         let text = try cursor.pop()
-        let (at, replace, coord) = try parseTypeOptions(cursor: &cursor)
-        try printJSON(["via": typeText(wid: window.wid, text: text, at: at, coord: coord, replace: replace)])
+        let (at, replace, coord, activate, keyHold, keyGap) = try parseTypeOptions(cursor: &cursor)
+        try printJSON([
+            "via": typeText(
+                wid: window.wid,
+                text: text,
+                at: at,
+                coord: coord,
+                replace: replace,
+                activate: activate,
+                keyHold: keyHold,
+                keyGap: keyGap
+            )
+        ])
+    case "paste":
+        let text = try cursor.pop()
+        let (at, coord, activate, submit, preserveClipboard) = try parsePasteOptions(cursor: &cursor)
+        try printJSON(pasteText(
+            wid: window.wid,
+            text: text,
+            at: at,
+            coord: coord,
+            activate: activate,
+            submit: submit,
+            preserveClipboard: preserveClipboard
+        ))
     case "press":
         let key = try cursor.pop()
         let modifiers = try parsePressModifiers(cursor: &cursor)
@@ -362,7 +410,7 @@ func runForegroundDesktopSubcommand(cursor: inout ArgumentCursor) throws {
         try printJSON(scrollGlobal(dx: dx, dy: dy))
     case "type":
         let text = try cursor.pop()
-        let (at, _, coord) = try parseTypeOptions(cursor: &cursor)
+        let (at, _, coord, _, _, _) = try parseTypeOptions(cursor: &cursor)
         try printJSON(try typeGlobal(text: text, at: at, coord: coord))
     case "press":
         let key = try cursor.pop()
@@ -420,7 +468,7 @@ func runForegroundDisplaySubcommand(cursor: inout ArgumentCursor) throws {
         try printJSON(scrollGlobal(dx: dx, dy: dy))
     case "type":
         let text = try cursor.pop()
-        let (at, _, coord) = try parseTypeOptions(cursor: &cursor)
+        let (at, _, coord, _, _, _) = try parseTypeOptions(cursor: &cursor)
         try printJSON(try typeDisplay(display: display, text: text, at: at, coord: coord))
     case "press":
         let key = try cursor.pop()

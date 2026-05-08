@@ -18,6 +18,9 @@ import {
   parseOutlookObserveArgs,
   runOutlookObserve,
 } from "../observe/targets/outlook.js";
+import { runPrefsCommand } from "../prefs/command.js";
+import { runTerminalCommand } from "../terminal/command.js";
+import { runWorkspaceCommand } from "../workspace/command.js";
 import {
   CommandUsageError,
   parseActCommand,
@@ -52,6 +55,7 @@ const adapterCommands = new Set([
   "list-apps",
   "list-displays",
   "list-windows",
+  "paste",
   "permissions",
   "press",
   "right-click",
@@ -83,13 +87,19 @@ export async function runCLI(args = process.argv.slice(2), io: IO = process): Pr
         return await runAgent(args.slice(1), io);
       case "observe":
         return await runObserve(args.slice(1), io);
+      case "prefs":
+        return runPrefsCommand(args.slice(1), createControlPlane(), io);
       case "report":
       case "reports":
         return await runReports(args.slice(1), io);
       case "soak":
         return await runSoakCLI(args.slice(1), io);
+      case "terminal":
+        return runTerminalCommand(args.slice(1), createControlPlane(), io);
       case "verify":
         return runVerify(args.slice(1), io);
+      case "workspace":
+        return runWorkspaceCommand(args.slice(1), createControlPlane(), io);
       default:
         if (adapterCommands.has(command)) return runNativeAdapterCommand(args, io);
         io.stderr.write(`unknown command: ${command}\n${usage()}\n`);
@@ -117,6 +127,11 @@ function usage(): string {
     "  macbridge doctor",
     "  macbridge permissions check --prompt",
     "  macbridge reports",
+    "  macbridge prefs init --preferred-screen left",
+    "  macbridge terminal start",
+    '  macbridge terminal send "echo hello"',
+    "  macbridge workspace apps",
+    "  macbridge workspace next",
     "  macbridge soak tui",
     "  macbridge soak smoke",
     "  macbridge windows list",

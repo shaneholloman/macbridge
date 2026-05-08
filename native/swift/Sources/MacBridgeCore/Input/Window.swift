@@ -1,3 +1,4 @@
+import AppKit
 import ApplicationServices
 import CoreGraphics
 import Foundation
@@ -91,7 +92,20 @@ func scroll(wid: CGWindowID, x: CGFloat, y: CGFloat, dx: CGFloat, dy: CGFloat, c
     return "cg"
 }
 
-func typeText(wid: CGWindowID, text: String, at: (CGFloat, CGFloat)?, coord: CoordMode, replace: Bool) throws -> String {
+func typeText(
+    wid: CGWindowID,
+    text: String,
+    at: (CGFloat, CGFloat)?,
+    coord: CoordMode,
+    replace: Bool,
+    activate: Bool,
+    keyHold: useconds_t = 15_000,
+    keyGap: useconds_t = 10_000
+) throws -> String {
+    if activate {
+        _ = try activateWindow(wid: wid)
+        usleep(120_000)
+    }
     let (pid, app, bounds) = try attach(wid)
     var target: AXUIElement?
     if let at {
@@ -114,7 +128,7 @@ func typeText(wid: CGWindowID, text: String, at: (CGFloat, CGFloat)?, coord: Coo
             var fullRange = CFRange(location: 0, length: before.count)
             if let rangeValue = AXValueCreate(.cfRange, &fullRange),
                axSet(target, kAXSelectedTextRangeAttribute as CFString, rangeValue),
-               nsTypeText(pid: pid, wid: wid, text: text) {
+               nsTypeText(pid: pid, wid: wid, text: text, keyHold: keyHold, keyGap: keyGap) {
                 usleep(120_000)
                 if (axGet(target, kAXValueAttribute as CFString) as? String ?? "") == text {
                     return "nsevent-selected"
@@ -133,7 +147,7 @@ func typeText(wid: CGWindowID, text: String, at: (CGFloat, CGFloat)?, coord: Coo
             }
         }
         let before = axGet(target, kAXValueAttribute as CFString) as? String ?? ""
-        if nsTypeText(pid: pid, wid: wid, text: text) {
+        if nsTypeText(pid: pid, wid: wid, text: text, keyHold: keyHold, keyGap: keyGap) {
             usleep(120_000)
             if (axGet(target, kAXValueAttribute as CFString) as? String ?? "") == before + text {
                 return "nsevent"
@@ -150,9 +164,72 @@ func typeText(wid: CGWindowID, text: String, at: (CGFloat, CGFloat)?, coord: Coo
     for character in text {
         guard let (code, needsShift) = keycodeForCharacter(character) else { continue }
         let flags: CGEventFlags = needsShift ? .maskShift : []
-        cgKeyPress(pid: pid, keycode: code, flags: flags, hold: 3_000)
+        cgKeyPress(pid: pid, keycode: code, flags: flags, hold: keyHold)
+        usleep(keyGap)
     }
     return "cg"
+}
+
+func pasteText(
+    wid: CGWindowID,
+    text: String,
+    at: (CGFloat, CGFloat)?,
+    coord: CoordMode,
+    activate: Bool,
+    submit: Bool,
+    preserveClipboard: Bool
+) throws -> [String: Any] {
+    if activate {
+        _ = try activateWindow(wid: wid)
+        usleep(120_000)
+    }
+
+    if let at {
+        _ = try click(wid: wid, x: at.0, y: at.1, coord: coord)
+        usleep(80_000)
+    }
+
+    let pasteboard = NSPasteboard.general
+    let previousText = pasteboard.string(forType: .string)
+    let hadPreviousText = previousText != nil
+
+    let restoreText = previousText
+    defer {
+        if preserveClipboard {
+            pasteboard.clearContents()
+            if let restoreText {
+                _ = pasteboard.setString(restoreText, forType: .string)
+            }
+        }
+    }
+
+    pasteboard.clearContents()
+    guard pasteboard.setString(text, forType: .string) else {
+        throw CUAError.usage("failed to set clipboard text")
+    }
+
+    let paste = try pressKey(wid: wid, key: "v", modifiers: ["cmd"])
+    usleep(150_000)
+
+    var submitResult: [String: Any]?
+    if submit {
+        submitResult = try pressKey(wid: wid, key: "Enter", modifiers: [])
+    }
+
+    var result: [String: Any] = [
+        "via": "clipboard",
+        "characters": text.count,
+        "bytes": text.utf8.count,
+        "activated": activate,
+        "submitted": submit,
+        "preservedClipboard": preserveClipboard,
+        "hadPreviousTextClipboard": hadPreviousText,
+        "paste": paste
+    ]
+    if let submitResult {
+        result["submit"] = submitResult
+    }
+    return result
 }
 
 func pressKey(wid: CGWindowID, key: String, modifiers: [String]) throws -> [String: Any] {

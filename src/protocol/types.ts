@@ -168,6 +168,15 @@ export type Action =
   | { type: "activate"; target: Target }
   | { type: "click"; target: Target; point: Point }
   | { type: "type"; target: Target; text: string; at?: Point; replace?: boolean }
+  | {
+      type: "paste";
+      target: Target;
+      text: string;
+      at?: Point;
+      activate?: boolean;
+      submit?: boolean;
+      preserveClipboard?: boolean;
+    }
   | { type: "press"; target: Target; key: string; modifiers?: string[] }
   | { type: "axAction"; target: Target; point: Point; action: string }
   | { type: "setFrame"; target: Target; frame: Rect }

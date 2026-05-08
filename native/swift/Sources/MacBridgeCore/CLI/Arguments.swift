@@ -114,11 +114,14 @@ func parseBackgroundCoordOptions(cursor: inout ArgumentCursor) throws -> (CoordM
     return (coord, anyWindow)
 }
 
-func parseBackgroundTypeOptions(cursor: inout ArgumentCursor) throws -> ((CGFloat, CGFloat)?, Bool, CoordMode, Bool) {
+func parseBackgroundTypeOptions(cursor: inout ArgumentCursor) throws -> ((CGFloat, CGFloat)?, Bool, CoordMode, Bool, Bool, useconds_t, useconds_t) {
     var at: (CGFloat, CGFloat)?
     var replace = false
     var coord = CoordMode.pixel
     var anyWindow = false
+    var activate = false
+    var keyHold: useconds_t = 15_000
+    var keyGap: useconds_t = 10_000
     while !cursor.args.isEmpty {
         let arg = try cursor.pop()
         switch arg {
@@ -126,6 +129,12 @@ func parseBackgroundTypeOptions(cursor: inout ArgumentCursor) throws -> ((CGFloa
             at = (try cursor.popDouble(), try cursor.popDouble())
         case "--replace":
             replace = true
+        case "--activate":
+            activate = true
+        case "--key-hold-ms":
+            keyHold = useconds_t(max(0, Double(try cursor.popDouble())) * 1_000)
+        case "--key-gap-ms":
+            keyGap = useconds_t(max(0, Double(try cursor.popDouble())) * 1_000)
         case "--coord":
             let raw = try cursor.pop()
             guard let parsed = CoordMode(rawValue: raw) else { throw CUAError.usage("unknown coord mode: \(raw)") }
@@ -136,7 +145,38 @@ func parseBackgroundTypeOptions(cursor: inout ArgumentCursor) throws -> ((CGFloa
             throw CUAError.usage("unknown type option: \(arg)")
         }
     }
-    return (at, replace, coord, anyWindow)
+    return (at, replace, coord, anyWindow, activate, keyHold, keyGap)
+}
+
+func parseBackgroundPasteOptions(cursor: inout ArgumentCursor) throws -> ((CGFloat, CGFloat)?, CoordMode, Bool, Bool, Bool, Bool) {
+    var at: (CGFloat, CGFloat)?
+    var coord = CoordMode.pixel
+    var anyWindow = false
+    var activate = false
+    var submit = false
+    var preserveClipboard = true
+    while !cursor.args.isEmpty {
+        let arg = try cursor.pop()
+        switch arg {
+        case "--at":
+            at = (try cursor.popDouble(), try cursor.popDouble())
+        case "--coord":
+            let raw = try cursor.pop()
+            guard let parsed = CoordMode(rawValue: raw) else { throw CUAError.usage("unknown coord mode: \(raw)") }
+            coord = parsed
+        case "--any-window":
+            anyWindow = true
+        case "--activate":
+            activate = true
+        case "--submit":
+            submit = true
+        case "--keep-clipboard":
+            preserveClipboard = false
+        default:
+            throw CUAError.usage("unknown paste option: \(arg)")
+        }
+    }
+    return (at, coord, anyWindow, activate, submit, preserveClipboard)
 }
 
 func parseBackgroundDragOptions(cursor: inout ArgumentCursor) throws -> (Double, Int, CoordMode, Bool) {
@@ -191,10 +231,13 @@ func parseBackgroundHotkey(cursor: inout ArgumentCursor) throws -> (String, [Str
     return (tokens.last!, Array(tokens.dropLast()), anyWindow)
 }
 
-func parseTypeOptions(cursor: inout ArgumentCursor) throws -> ((CGFloat, CGFloat)?, Bool, CoordMode) {
+func parseTypeOptions(cursor: inout ArgumentCursor) throws -> ((CGFloat, CGFloat)?, Bool, CoordMode, Bool, useconds_t, useconds_t) {
     var at: (CGFloat, CGFloat)?
     var replace = false
     var coord = CoordMode.pixel
+    var activate = false
+    var keyHold: useconds_t = 15_000
+    var keyGap: useconds_t = 10_000
     while !cursor.args.isEmpty {
         let arg = try cursor.pop()
         switch arg {
@@ -202,6 +245,12 @@ func parseTypeOptions(cursor: inout ArgumentCursor) throws -> ((CGFloat, CGFloat
             at = (try cursor.popDouble(), try cursor.popDouble())
         case "--replace":
             replace = true
+        case "--activate":
+            activate = true
+        case "--key-hold-ms":
+            keyHold = useconds_t(max(0, Double(try cursor.popDouble())) * 1_000)
+        case "--key-gap-ms":
+            keyGap = useconds_t(max(0, Double(try cursor.popDouble())) * 1_000)
         case "--coord":
             let raw = try cursor.pop()
             guard let parsed = CoordMode(rawValue: raw) else { throw CUAError.usage("unknown coord mode: \(raw)") }
@@ -210,7 +259,35 @@ func parseTypeOptions(cursor: inout ArgumentCursor) throws -> ((CGFloat, CGFloat
             throw CUAError.usage("unknown type option: \(arg)")
         }
     }
-    return (at, replace, coord)
+    return (at, replace, coord, activate, keyHold, keyGap)
+}
+
+func parsePasteOptions(cursor: inout ArgumentCursor) throws -> ((CGFloat, CGFloat)?, CoordMode, Bool, Bool, Bool) {
+    var at: (CGFloat, CGFloat)?
+    var coord = CoordMode.pixel
+    var activate = false
+    var submit = false
+    var preserveClipboard = true
+    while !cursor.args.isEmpty {
+        let arg = try cursor.pop()
+        switch arg {
+        case "--at":
+            at = (try cursor.popDouble(), try cursor.popDouble())
+        case "--coord":
+            let raw = try cursor.pop()
+            guard let parsed = CoordMode(rawValue: raw) else { throw CUAError.usage("unknown coord mode: \(raw)") }
+            coord = parsed
+        case "--activate":
+            activate = true
+        case "--submit":
+            submit = true
+        case "--keep-clipboard":
+            preserveClipboard = false
+        default:
+            throw CUAError.usage("unknown paste option: \(arg)")
+        }
+    }
+    return (at, coord, activate, submit, preserveClipboard)
 }
 
 func parseDragOptions(cursor: inout ArgumentCursor) throws -> (Double, Int, CoordMode) {

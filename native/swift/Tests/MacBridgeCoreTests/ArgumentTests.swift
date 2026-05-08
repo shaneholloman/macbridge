@@ -27,4 +27,36 @@ final class ArgumentTests: XCTestCase {
         XCTAssertEqual(parsed.1, 12)
         XCTAssertEqual(parsed.2, true)
     }
+
+    func testBackgroundTypeOptionsParseActivationAndTiming() throws {
+        var cursor = ArgumentCursor(args: ["--activate", "--key-hold-ms", "25", "--key-gap-ms", "15", "--any-window"])
+        let parsed = try parseBackgroundTypeOptions(cursor: &cursor)
+
+        XCTAssertNil(parsed.0)
+        XCTAssertEqual(parsed.1, false)
+        XCTAssertEqual(parsed.2, .pixel)
+        XCTAssertEqual(parsed.3, true)
+        XCTAssertEqual(parsed.4, true)
+        XCTAssertEqual(parsed.5, 25_000)
+        XCTAssertEqual(parsed.6, 15_000)
+    }
+
+    func testBackgroundPasteOptionsPreserveClipboardByDefault() throws {
+        var cursor = ArgumentCursor(args: ["--activate", "--submit", "--any-window"])
+        let parsed = try parseBackgroundPasteOptions(cursor: &cursor)
+
+        XCTAssertNil(parsed.0)
+        XCTAssertEqual(parsed.1, .pixel)
+        XCTAssertEqual(parsed.2, true)
+        XCTAssertEqual(parsed.3, true)
+        XCTAssertEqual(parsed.4, true)
+        XCTAssertEqual(parsed.5, true)
+    }
+
+    func testBackgroundPasteOptionsCanKeepClipboardText() throws {
+        var cursor = ArgumentCursor(args: ["--keep-clipboard"])
+        let parsed = try parseBackgroundPasteOptions(cursor: &cursor)
+
+        XCTAssertEqual(parsed.5, false)
+    }
 }

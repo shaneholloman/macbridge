@@ -46,6 +46,15 @@ export const ActionSchema = z.discriminatedUnion("type", [
     replace: z.boolean().optional(),
   }),
   z.object({
+    type: z.literal("paste"),
+    target: TargetSchema,
+    text: z.string(),
+    at: PointSchema.optional(),
+    activate: z.boolean().optional(),
+    submit: z.boolean().optional(),
+    preserveClipboard: z.boolean().optional(),
+  }),
+  z.object({
     type: z.literal("press"),
     target: TargetSchema,
     key: z.string(),
