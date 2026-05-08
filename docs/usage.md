@@ -36,6 +36,8 @@ bunx macbridge verify expectation.json
 bunx macbridge agent models --type text --provider openai --json
 bunx macbridge prefs init --preferred-screen left
 bunx macbridge apps list
+bunx macbridge aria dev start --repo /Users/shaneholloman/git/sources/uicnz/aria
+bunx macbridge aria installed observe --launch --out tmp/observations/aria
 bunx macbridge apps observe helium --launch --out tmp/observations/helium
 bunx macbridge terminal start --screen left --session macbridge
 bunx macbridge terminal send "echo hello from the owned lane" --session macbridge
@@ -71,12 +73,18 @@ windows to that screen's visible frame. Full-screen Spaces are avoided.
 MacBridge keeps app-specific policy in TypeScript adapters under `src/apps`.
 Adapters own app identity, launch, quit, readiness, window selection, and any
 workflow-specific observation behavior. Built-in adapters currently cover
-Helium, TextEdit, Ghostty, macOS Terminal, and Microsoft Outlook.
+Aria, Helium, TextEdit, Ghostty, macOS Terminal, and Microsoft Outlook.
 
 ```bash
 macbridge apps list
+macbridge aria dev start --repo /Users/shaneholloman/git/sources/uicnz/aria
+macbridge aria installed observe --launch --out tmp/observations/aria
 macbridge apps observe outlook --launch --out tmp/observations/outlook
 ```
+
+The Aria adapter intentionally separates source-checkout testing from packaged
+app testing. `aria dev` uses the terminal lane and `bun run dev`; `aria
+installed` targets the macOS app bundle with bundle ID `nz.uic.aria`.
 
 ## Terminal Lane
 

@@ -12,6 +12,7 @@ import {
   planCommand,
   runPlanCommand,
 } from "../agent/command.js";
+import { runAriaCommand } from "../aria/command.js";
 import { createControlPlane } from "../core/client.js";
 import { defaultBin } from "../native/macbridge.js";
 import { runPrefsCommand } from "../prefs/command.js";
@@ -81,6 +82,8 @@ export async function runCLI(args = process.argv.slice(2), io: IO = process): Pr
         return await runAct(args.slice(1), io);
       case "agent":
         return await runAgent(args.slice(1), io);
+      case "aria":
+        return await runAriaCommand(args.slice(1), createControlPlane, io);
       case "app":
       case "apps":
         return await runAppsCommand(args.slice(1), createControlPlane, io);
@@ -127,6 +130,8 @@ function usage(): string {
     "  macbridge permissions check --prompt",
     "  macbridge reports",
     "  macbridge prefs init --preferred-screen left",
+    "  macbridge aria dev start --repo /path/to/aria",
+    "  macbridge aria installed observe --launch",
     "  macbridge apps list",
     "  macbridge apps observe helium --launch",
     "  macbridge terminal start",

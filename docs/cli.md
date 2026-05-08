@@ -33,13 +33,21 @@ App-specific behavior lives behind explicit adapters:
 
 ```bash
 macbridge apps list
+macbridge aria dev start --repo /Users/shaneholloman/git/sources/uicnz/aria
+macbridge aria installed observe --launch --out tmp/observations/aria
 macbridge apps observe helium --launch --out tmp/observations/helium
 macbridge apps observe outlook --launch --prompt --out tmp/observations/outlook
 ```
 
 Adapters own app identity, launch/readiness, window selection, cleanup, and
-workflow-specific observation behavior. The built-ins are `helium`, `textedit`,
-`ghostty`, `terminal`, and `outlook`.
+workflow-specific observation behavior. The built-ins are `aria`, `helium`,
+`textedit`, `ghostty`, `terminal`, and `outlook`.
+
+Aria has two explicit MacBridge targets:
+
+- `macbridge aria dev ...` starts and observes a source checkout through the
+  terminal lane with `bun run dev`.
+- `macbridge aria installed ...` targets the packaged macOS Aria app bundle.
 
 ## Preferences
 

@@ -8,6 +8,7 @@ import {
 describe("adapter registry", () => {
   test("exposes first-class adapters for known app surfaces", () => {
     expect(listAppAdapters().map((adapter) => adapter.id)).toEqual([
+      "aria",
       "helium",
       "textedit",
       "ghostty",
@@ -18,6 +19,8 @@ describe("adapter registry", () => {
 
   test("matches adapters by id, app name, and bundle id", () => {
     expect(getAppAdapter("Helium")?.id).toBe("helium");
+    expect(getAppAdapter("Aria Dev")?.id).toBe("aria");
+    expect(getAppAdapter("nz.uic.aria")?.id).toBe("aria");
     expect(getAppAdapter("com.apple.TextEdit")?.id).toBe("textedit");
     expect(getAppAdapter("Microsoft Outlook")?.id).toBe("outlook");
   });

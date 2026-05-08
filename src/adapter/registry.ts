@@ -1,3 +1,4 @@
+import { ariaAdapter } from "../apps/aria.js";
 import { ghosttyAdapter } from "../apps/ghostty.js";
 import { heliumAdapter } from "../apps/helium.js";
 import { outlookAdapter } from "../apps/outlook.js";
@@ -7,6 +8,7 @@ import { isTerminalAppAdapter } from "./helpers.js";
 import type { AppAdapter, TerminalAppAdapter } from "./types.js";
 
 export const appAdapters: AppAdapter[] = [
+  ariaAdapter,
   heliumAdapter,
   textEditAdapter,
   ghosttyAdapter,

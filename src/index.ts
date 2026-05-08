@@ -57,11 +57,32 @@ export {
   Session,
   validateAction,
 } from "./agent/session.js";
+export {
+  ARIA_BUNDLE_ID,
+  ARIA_DEV_COMMAND,
+  ARIA_DEV_SESSION,
+  ariaAdapter,
+  observeAriaInstalled,
+} from "./apps/aria.js";
 export { ghosttyAdapter } from "./apps/ghostty.js";
 export { heliumAdapter } from "./apps/helium.js";
 export { observeOutlook, outlookAdapter } from "./apps/outlook.js";
 export { macosTerminalAdapter } from "./apps/terminal.js";
 export { textEditAdapter } from "./apps/textedit.js";
+export type {
+  AriaCaptureOptions,
+  AriaDevStartOptions,
+  AriaInstalledObserveOptions,
+  AriaSessionOptions,
+} from "./aria/command.js";
+export {
+  ariaUsage,
+  parseAriaCaptureArgs,
+  parseAriaDevStartArgs,
+  parseAriaInstalledObserveArgs,
+  parseAriaSessionArgs,
+  runAriaCommand,
+} from "./aria/command.js";
 export type {
   ActCommandOptions,
   ObserveCommandOptions,
