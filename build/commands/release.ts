@@ -9,7 +9,7 @@ export async function release(args: string[] = []): Promise<void> {
   await dist(args);
   await sign(args);
   await notarize(args);
-  await runGhosttyPackaging(toShellArgs(args));
+  await runGhosttyPackaging([...toShellArgs(args), "--skip-agent-rebuild"]);
   await pkg([...args, "--from-dist"]);
   await verify([...args, "--from-dist", "--require-signed"]);
 }

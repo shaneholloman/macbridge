@@ -87,6 +87,7 @@ export async function verify(args: string[] = []): Promise<void> {
       "bun",
       "x",
       "tsc",
+      "--ignoreConfig",
       "--noEmit",
       "--target",
       "ES2022",

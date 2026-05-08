@@ -31,6 +31,7 @@ export async function buildEntrypoint(
     "x",
     "tsc",
     paths.src.entrypoint,
+    "--ignoreConfig",
     "--declaration",
     "--emitDeclarationOnly",
     "--outDir",

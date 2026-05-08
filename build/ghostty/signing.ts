@@ -22,6 +22,7 @@ export interface NotarizeGhosttyArtifactsInputs {
   dmgPath: string | null;
   keychainProfile: string;
   log: BuildLogger;
+  target: string;
 }
 
 export async function signAppBundle(inputs: SignAppBundleInputs): Promise<void> {
@@ -102,13 +103,18 @@ export async function notarizeGhosttyArtifacts(
   await $`ditto -c -k --keepParent ${inputs.appBundlePath} ${appZip}`.quiet();
   try {
     try {
-      await notarizeArtifact({
+      const notaryOutput = await notarizeArtifact({
         artifactPath: appZip,
         keychainProfile: inputs.keychainProfile,
         log: inputs.log,
         name: `${inputs.appName}.app`,
         staplePath: inputs.appBundlePath,
       });
+      await ensureDir(paths.dist.security);
+      await Bun.write(
+        join(paths.dist.security, `${inputs.appName}-${inputs.target}.app.notary.json`),
+        `${notaryOutput}\n`,
+      );
       appendArtifactSecurityRecord({
         artifactKind: "appBundle",
         artifactPath: inputs.appBundlePath,

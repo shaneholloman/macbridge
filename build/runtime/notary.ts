@@ -17,7 +17,7 @@ export type NotarizeArtifactOptions = {
   staplePath?: string;
 };
 
-export async function notarizeArtifact(options: NotarizeArtifactOptions): Promise<void> {
+export async function notarizeArtifact(options: NotarizeArtifactOptions): Promise<string> {
   const name = options.name ?? options.artifactPath;
   options.log.step(`Notarizing ${name}`);
   const result = await run(createLoggerAdapter(options.log), [
@@ -40,6 +40,7 @@ export async function notarizeArtifact(options: NotarizeArtifactOptions): Promis
   await run(createLoggerAdapter(options.log), ["xcrun", "stapler", "staple", staplePath]);
   await run(createLoggerAdapter(options.log), ["xcrun", "stapler", "validate", staplePath]);
   options.log.ok(`${name} notarized`);
+  return result.stdout;
 }
 
 function createLoggerAdapter(log: NotaryLogger): Logger {

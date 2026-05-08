@@ -47,6 +47,7 @@ const basePackageFiles = [
   "package/dist/agent/planner.d.ts",
   "package/dist/agent/session.d.ts",
   "package/dist/cli/command.d.ts",
+  "package/dist/bin/macbridge-darwin-arm64",
   "package/dist/cli/main.d.ts",
   "package/dist/core/client.d.ts",
   "package/dist/core/control.d.ts",

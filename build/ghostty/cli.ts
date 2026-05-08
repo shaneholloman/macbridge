@@ -223,6 +223,7 @@ export async function runGhosttyPackaging(args = process.argv.slice(2)): Promise
     dmgPath,
     keychainProfile: NOTARIZE_PROFILE,
     log,
+    target: options.target,
   });
 
   process.stdout.write("\nBuild complete.\n");

@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { appBundlePath, appExecutablePath, appNotaryEvidencePath } from "../apple/app.ts";
+import { appNotaryEvidencePath } from "../apple/app.ts";
 import { macOSTargets } from "../native/targets.ts";
 import { assertPackageContents } from "../npm/contract.ts";
 import { createBuildLog } from "../runtime/log.ts";
@@ -95,8 +95,8 @@ async function verifySignedPackageInputs(log: ReturnType<typeof createBuildLog>)
     }
     await run(log, ["codesign", "--verify", "--strict", "--verbose=2", binary]);
 
-    const app = appBundlePath(target);
-    const appExecutable = appExecutablePath(target);
+    const app = join(paths.dist.root, target.id, "MacBridge.app");
+    const appExecutable = join(app, "Contents", "MacOS", "macbridge");
     const appEvidence = appNotaryEvidencePath(target);
     if (!(await Bun.file(appExecutable).exists())) {
       throw new Error(`missing signed app executable: ${appExecutable}`);

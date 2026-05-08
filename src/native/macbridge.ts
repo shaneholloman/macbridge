@@ -43,19 +43,19 @@ export function packagedBin(): string | undefined {
   if (process.arch !== "arm64") return undefined;
 
   const base = dirname(fileURLToPath(import.meta.url));
-  const appBin = join(
-    base,
-    "..",
-    "darwin-arm64",
-    "MacBridge.app",
-    "Contents",
-    "MacOS",
-    "macbridge-runtime",
-  );
-  if (existsSync(appBin)) return appBin;
+  const appBins = [
+    join(base, "darwin-arm64", "MacBridge.app", "Contents", "MacOS", "macbridge-runtime"),
+    join(base, "..", "darwin-arm64", "MacBridge.app", "Contents", "MacOS", "macbridge-runtime"),
+  ];
+  for (const appBin of appBins) {
+    if (existsSync(appBin)) return appBin;
+  }
 
-  const standalone = join(base, "..", "bin", "macbridge-darwin-arm64");
-  return existsSync(standalone) ? standalone : undefined;
+  const standalones = [
+    join(base, "bin", "macbridge-darwin-arm64"),
+    join(base, "..", "bin", "macbridge-darwin-arm64"),
+  ];
+  return standalones.find((path) => existsSync(path));
 }
 
 export function resolveDefaultBin(): string {

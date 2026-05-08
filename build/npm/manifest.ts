@@ -22,6 +22,7 @@ export const packageContract: PackageContract = {
     "dist/agent/*.d.ts",
     "dist/pkg/macbridge-*-darwin-arm64.pkg",
     "dist/bin/macbridge",
+    "dist/bin/macbridge-darwin-arm64",
     "dist/build/latest.json",
     "dist/build/logs/commands.jsonl",
     "dist/build/manifests/*.json",
