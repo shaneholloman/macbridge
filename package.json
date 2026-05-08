@@ -1,6 +1,6 @@
 {
   "name": "macbridge",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "description": "TypeScript-friendly native macOS automation adapter.",
   "license": "MIT",
