@@ -57,7 +57,14 @@ macbridge observe window <wid> --display-screenshot main --ax --out tmp/observat
 macbridge act action.json
 macbridge verify expectation.json
 macbridge agent models --type text --provider openai --json
+macbridge prefs init --preferred-screen left
+macbridge terminal start --screen left --session macbridge
+macbridge terminal send "echo hello" --session macbridge
 ```
+
+Workspace preferences live at `~/MacBridge/preferences.toml`. The terminal lane
+uses a read-only visible Ghostty client backed by tmux so MacBridge can drive a
+dedicated screen while the human keeps working elsewhere.
 
 ## Documentation
 

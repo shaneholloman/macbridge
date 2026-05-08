@@ -34,7 +34,48 @@ bunx macbridge observe window <wid> --display-screenshot main --ax --out tmp/obs
 bunx macbridge act action.json
 bunx macbridge verify expectation.json
 bunx macbridge agent models --type text --provider openai --json
+bunx macbridge prefs init --preferred-screen left
+bunx macbridge terminal start --screen left --session macbridge
+bunx macbridge terminal send "echo hello from the owned lane" --session macbridge
 ```
+
+## Workspace Preferences
+
+MacBridge keeps user-owned preferences at:
+
+```bash
+~/MacBridge/preferences.toml
+```
+
+Use preferences to map physical screens to workspace names such as `left`,
+`middle`, and `right`, then choose the default automation workspace:
+
+```toml
+[workspace]
+preferredScreen = "left"
+terminalApp = "Ghostty"
+terminalSession = "macbridge"
+terminalReadOnly = true
+```
+
+The preferred workspace screen is intent, not fixed geometry. MacBridge resolves
+the named screen against the currently attached displays and maximizes owned
+windows to that screen's visible frame. Full-screen Spaces are avoided.
+
+## Terminal Lane
+
+Terminal workflows can use a tmux-backed lane so MacBridge sends input through
+the PTY instead of the global macOS keyboard focus:
+
+```bash
+macbridge terminal start --screen left --session macbridge
+macbridge terminal send "bun run dev" --session macbridge
+macbridge terminal capture --session macbridge -o tmp/macbridge-lane.png
+```
+
+The visible terminal client is read-only by default. It can show exactly what
+MacBridge is doing while protecting the lane from accidental human keystrokes.
+Use `--writable` only when intentionally debugging the terminal manually.
 
 ## Capture Semantics
 

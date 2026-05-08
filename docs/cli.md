@@ -27,6 +27,40 @@ For TypeScript harness commands during development, use Bun:
 bunx macbridge observe desktop --display-screenshot main
 ```
 
+## Preferences
+
+MacBridge stores user preferences in `~/MacBridge/preferences.toml`.
+
+```bash
+macbridge prefs init --preferred-screen left
+macbridge prefs show
+macbridge prefs set preferred-screen left
+```
+
+Screen aliases describe the user's physical workspace, such as `left`,
+`middle`, and `right`. They let MacBridge choose where to place owned automation
+windows without rediscovering the user's screen layout every run.
+
+## Terminal Workspace
+
+Terminal automation has an owned lane:
+
+```bash
+macbridge terminal start --screen left --session macbridge
+macbridge terminal send "echo hello" --session macbridge
+macbridge terminal capture --session macbridge -o tmp/lane.png
+macbridge terminal stop --session macbridge
+```
+
+The default visible Ghostty client is read-only and attached to a tmux session.
+MacBridge sends commands to tmux programmatically, so the human can continue
+working on another screen without fighting for keyboard focus.
+
+This is a terminal/PTY solution. Ordinary GUI apps still use native macOS
+operations such as Accessibility, activation, window placement, capture, and
+app-specific APIs where available. Synthetic typing remains the human-fidelity
+fallback when a GUI workflow truly requires keyboard simulation.
+
 ## Modes
 
 ### Background

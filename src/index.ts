@@ -89,6 +89,21 @@ export {
 } from "./observe/targets/outlook.js";
 export type { VerificationContext } from "./observe/verify.js";
 export { verifyExpectation } from "./observe/verify.js";
+export { prefsUsage, runPrefsCommand } from "./prefs/command.js";
+export type { Preferences, ResolvedScreen, ScreenPreference } from "./prefs/preferences.js";
+export {
+  createPreferences,
+  formatPreferences,
+  inferScreenPreferences,
+  loadPreferences,
+  parsePreferences,
+  preferencesDir,
+  preferencesExist,
+  preferencesPath,
+  readPreferences,
+  resolveWorkspaceScreen,
+  writePreferences,
+} from "./prefs/preferences.js";
 export {
   ActionSchema,
   CoordSchema,
@@ -132,3 +147,24 @@ export type {
   Target,
   Verification,
 } from "./protocol/types.js";
+export { runTerminalCommand, terminalUsage } from "./terminal/command.js";
+export type {
+  TerminalCaptureOptions,
+  TerminalLane,
+  TerminalSendOptions,
+  TerminalStartOptions,
+} from "./terminal/lane.js";
+export {
+  captureLane,
+  resolveLane,
+  sendLane,
+  startLane,
+  stopLane,
+} from "./terminal/lane.js";
+export { runWorkspaceCommand, workspaceUsage } from "./workspace/command.js";
+export type { WorkspaceSelection } from "./workspace/workspace.js";
+export {
+  focusOffset,
+  maximizeTarget,
+  workspaceSelection,
+} from "./workspace/workspace.js";
