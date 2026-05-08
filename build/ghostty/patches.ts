@@ -76,6 +76,192 @@ const CONFIG_NEW_LOAD_BLOCK = `            // Always load default user config fi
                 macbridge_config_load_file(cfg, path)
             }`;
 
+const APP_DELEGATE_CLASS_HEADER = `import AppKit
+import SwiftUI
+import UserNotifications
+import OSLog
+import Sparkle
+import MacBridgeKit
+
+class AppDelegate`;
+
+const APP_DELEGATE_NPM_UPDATE_CHECKER = `import AppKit
+import SwiftUI
+import UserNotifications
+import OSLog
+import Sparkle
+import MacBridgeKit
+
+private final class MacBridgeNpmUpdateChecker {
+    static let shared = MacBridgeNpmUpdateChecker()
+
+    private struct NpmPackage: Decodable {
+        let version: String
+    }
+
+    private let registryURL = URL(string: "https://registry.npmjs.org/macbridge/latest")!
+    private let packageURL = URL(string: "https://www.npmjs.com/package/macbridge")!
+    private let installCommand = "npx macbridge@latest"
+    private var isChecking = false
+
+    private init() {}
+
+    func checkForUpdates() {
+        guard !isChecking else { return }
+        isChecking = true
+
+        var request = URLRequest(url: registryURL)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.timeoutInterval = 15
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("MacBridge", forHTTPHeaderField: "User-Agent")
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self else { return }
+
+            if let error {
+                completeWithFailure(error.localizedDescription)
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completeWithFailure("The npm registry did not return an HTTP response.")
+                return
+            }
+
+            guard (200..<300).contains(httpResponse.statusCode) else {
+                completeWithFailure("The npm registry returned HTTP \\(httpResponse.statusCode).")
+                return
+            }
+
+            guard let data else {
+                completeWithFailure("The npm registry returned an empty response.")
+                return
+            }
+
+            do {
+                let latest = try JSONDecoder().decode(NpmPackage.self, from: data)
+                let version = latest.version.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !version.isEmpty else {
+                    completeWithFailure("The npm registry response did not include a version.")
+                    return
+                }
+                completeWithVersion(version)
+            } catch {
+                completeWithFailure("The npm registry response could not be read: \\(error.localizedDescription)")
+            }
+        }.resume()
+    }
+
+    private func completeWithVersion(_ latestVersion: String) {
+        DispatchQueue.main.async {
+            self.isChecking = false
+
+            let currentVersion = self.currentVersion
+            if let currentVersion {
+                if self.isVersion(latestVersion, newerThan: currentVersion) {
+                    self.showUpdateAvailable(latestVersion: latestVersion, currentVersion: currentVersion)
+                } else {
+                    self.showUpToDate(latestVersion: latestVersion, currentVersion: currentVersion)
+                }
+            } else {
+                self.showUpdateAvailable(latestVersion: latestVersion, currentVersion: currentVersion)
+            }
+        }
+    }
+
+    private func completeWithFailure(_ message: String) {
+        DispatchQueue.main.async {
+            self.isChecking = false
+            self.showFailure(message)
+        }
+    }
+
+    private var currentVersion: String? {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+    }
+
+    private func isVersion(_ candidate: String, newerThan current: String) -> Bool {
+        let candidateParts = numericVersionParts(candidate)
+        let currentParts = numericVersionParts(current)
+        let count = max(candidateParts.count, currentParts.count)
+
+        for index in 0..<count {
+            let left = index < candidateParts.count ? candidateParts[index] : 0
+            let right = index < currentParts.count ? currentParts[index] : 0
+            if left != right { return left > right }
+        }
+
+        return false
+    }
+
+    private func numericVersionParts(_ version: String) -> [Int] {
+        let coreVersion = version.split(separator: "-", maxSplits: 1).first ?? ""
+        return coreVersion.split(separator: ".").map { part in
+            let digits = part.prefix { $0.isNumber }
+            return Int(String(digits)) ?? 0
+        }
+    }
+
+    private func showUpdateAvailable(latestVersion: String, currentVersion: String?) {
+        let alert = NSAlert()
+        alert.messageText = "A MacBridge update is available"
+        if let currentVersion {
+            alert.informativeText = "MacBridge \\(latestVersion) is available on npm. This app is running \\(currentVersion)."
+        } else {
+            alert.informativeText = "MacBridge \\(latestVersion) is available on npm. This app could not read its installed version."
+        }
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Open npm")
+        alert.addButton(withTitle: "Copy Command")
+        alert.addButton(withTitle: "OK")
+
+        switch alert.runModal() {
+        case .alertFirstButtonReturn:
+            NSWorkspace.shared.open(npmVersionURL(for: latestVersion))
+        case .alertSecondButtonReturn:
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(installCommand, forType: .string)
+        default:
+            break
+        }
+    }
+
+    private func showUpToDate(latestVersion: String, currentVersion: String) {
+        let alert = NSAlert()
+        alert.messageText = "MacBridge is up to date"
+        alert.informativeText = "This app is running \\(currentVersion). npm latest is \\(latestVersion)."
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
+    }
+
+    private func showFailure(_ message: String) {
+        let alert = NSAlert()
+        alert.messageText = "MacBridge could not check for updates"
+        alert.informativeText = message
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
+    }
+
+    private func npmVersionURL(for version: String) -> URL {
+        let encodedVersion = version.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? version
+        return URL(string: "https://www.npmjs.com/package/macbridge/v/\\(encodedVersion)") ?? packageURL
+    }
+}
+
+class AppDelegate`;
+
+const APP_DELEGATE_OLD_CHECK_FOR_UPDATES = `    @IBAction func checkForUpdates(_ sender: Any?) {
+        updateController.checkForUpdates()
+        // UpdateSimulator.happyPath.simulate(with: updateViewModel)
+    }`;
+
+const APP_DELEGATE_NEW_CHECK_FOR_UPDATES = `    @IBAction func checkForUpdates(_ sender: Any?) {
+        MacBridgeNpmUpdateChecker.shared.checkForUpdates()
+    }`;
+
 const ABOUT_VIEW_STATIC_CONTENT = `import ApplicationServices
 import AppKit
 import CoreGraphics
@@ -340,6 +526,22 @@ export function applyGhosttySwiftPatches(log: BuildLogger, ghosttyDir: string): 
       replacement: APP_DELEGATE_NEW_INIT,
       search: APP_DELEGATE_OLD_INIT,
       successMessage: "AppDelegate patched: bundled config path",
+    },
+    {
+      filePath: join(ghosttyDir, "macos/Sources/App/macOS/AppDelegate.swift"),
+      id: "ghostty-app-delegate-npm-update-checker",
+      notFoundMessage: "class header pattern not found (may already be patched)",
+      replacement: APP_DELEGATE_NPM_UPDATE_CHECKER,
+      search: APP_DELEGATE_CLASS_HEADER,
+      successMessage: "AppDelegate patched: npm update checker installed",
+    },
+    {
+      filePath: join(ghosttyDir, "macos/Sources/App/macOS/AppDelegate.swift"),
+      id: "ghostty-app-delegate-check-for-updates",
+      notFoundMessage: "checkForUpdates action pattern not found (may already be patched)",
+      replacement: APP_DELEGATE_NEW_CHECK_FOR_UPDATES,
+      search: APP_DELEGATE_OLD_CHECK_FOR_UPDATES,
+      successMessage: "AppDelegate patched: Check for Updates routes through npm",
     },
     {
       filePath: join(ghosttyDir, "macos/Sources/MacBridge/MacBridge.Config.swift"),
