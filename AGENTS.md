@@ -76,7 +76,7 @@ primitive that the TypeScript command calls.
 - Use existing local helpers before adding abstractions.
 - Keep comments sparse and useful.
 - Use structured APIs instead of ad hoc parsing when available.
-- Put screenshots under repo-local `screenshots/` for easy inspection.
+- Put screen captures under repo-local `screens/` for easy inspection.
 - Prefer TypeScript for repo automation and demos. Do not add shell scripts unless there is a strong reason.
 - Use Bun for TypeScript runtime, package management, scripts, and lockfiles.
 - Do not introduce npm/yarn/pnpm lockfiles or Node-centric scripts.

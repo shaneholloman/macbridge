@@ -96,7 +96,7 @@ export function sendLane(control: ControlPlane, options: TerminalSendOptions): T
 
 export function captureLane(control: ControlPlane, options: TerminalCaptureOptions = {}): string {
   const lane = resolveLane(control, options);
-  const out = options.out ?? `screenshots/workspace-${lane.screen}.png`;
+  const out = options.out ?? `screens/workspace-${lane.screen}.png`;
   control.capture({ kind: "display", display: lane.display.displayID }, out);
   return out;
 }

@@ -19,7 +19,7 @@ func compactUsage() -> String {
 
     Common:
       macbridge permissions check --prompt
-      macbridge capture display main --png -o screenshots/display.png
+      macbridge capture display main --png -o screens/display.png
       macbridge act window <wid|app> click <x> <y>
 
     Help:
@@ -164,9 +164,9 @@ func compactCaptureHelp() -> String {
     capture needs a target.
 
     Try:
-      mb capture display main --png -o screenshots/display.png
-      mb capture app --png -o screenshots/front-app.png
-      mb capture window <wid|app> --png -o screenshots/window.png
+      mb capture display main --png -o screens/display.png
+      mb capture app --png -o screens/front-app.png
+      mb capture window <wid|app> --png -o screens/window.png
     """
 }
 

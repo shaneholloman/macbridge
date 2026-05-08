@@ -279,7 +279,7 @@ permission-sensitive behavior has obvious ownership.
 Security-sensitive considerations:
 
 - Keep Screen Recording and Accessibility requirements documented.
-- Keep screenshots local by default under `screenshots/` and ignored by Git.
+- Keep screen captures local by default under `screens/` and ignored by Git.
 - Avoid adding public Swift APIs that expose raw event posting without clear
   call-site intent.
 - Preserve explicit CLI commands for actions that click, type, or press keys.

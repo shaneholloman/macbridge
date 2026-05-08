@@ -75,7 +75,7 @@ export const forbiddenPackagePathParts = [
   ".npmrc",
   ".zip",
   "node_modules/",
-  "screenshots/",
+  "screens/",
   "soak/runs/",
   "soak/reports/",
   "tmp/",

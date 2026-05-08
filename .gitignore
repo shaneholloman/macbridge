@@ -10,7 +10,7 @@ dist/
 *.png
 *.jpg
 *.jpeg
-screenshots/stress/
+screens/stress/
 soak/runs/*
 !soak/runs/.gitkeep
 soak/reports/*

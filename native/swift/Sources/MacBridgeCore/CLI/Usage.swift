@@ -53,7 +53,7 @@ func usage() -> String {
       1. Run list-apps if you need a bundle id or pid.
       2. Run list-windows, optionally filtered by --app/--bundle-id/--pid,
          and choose a wid.
-      3. Run screenshot <wid> --png, or pass -o screenshots/window.png.
+      3. Run screenshot <wid> --png, or pass -o screens/window.png.
       4. Inspect the actual image dimensions, or use width/height from
          list-windows. Those dimensions are the coordinate frame.
       5. Click/type/drag/scroll with x,y measured from the screenshot's top-left.
@@ -188,21 +188,21 @@ func usage() -> String {
       macbridge service send cursor move 700 400 --duration 0.25 --wait
       macbridge service status
       macbridge service stop
-      macbridge screenshot 12345 --png -o screenshots/app.png
-      macbridge screenshot Helium --png -o screenshots/helium.png --any-window
+      macbridge screenshot 12345 --png -o screens/app.png
+      macbridge screenshot Helium --png -o screens/helium.png --any-window
       macbridge activate Helium --any-window
-      macbridge foreground-app screenshot --png -o screenshots/front.png
-      macbridge foreground-desktop screenshot --png -o screenshots/screen.png
+      macbridge foreground-app screenshot --png -o screens/front.png
+      macbridge foreground-desktop screenshot --png -o screens/screen.png
       macbridge foreground-display 2 info
-      macbridge foreground-display 2 screenshot --png -o screenshots/display-2.png
+      macbridge foreground-display 2 screenshot --png -o screens/display-2.png
       macbridge foreground-display 2 click 240 180
       macbridge windows list --app Helium
       macbridge windows frame Helium --any-window
       macbridge windows maximize Helium --display main --any-window
       macbridge windows activate Helium --any-window
       macbridge displays list
-      macbridge capture window 12345 --png -o screenshots/app.png
-      macbridge capture display 2 --png -o screenshots/display-2.png
+      macbridge capture window 12345 --png -o screens/app.png
+      macbridge capture display 2 --png -o screens/display-2.png
       macbridge act window 12345 click 240 180
       macbridge act display 2 click 240 180
       macbridge foreground-app click 240 180

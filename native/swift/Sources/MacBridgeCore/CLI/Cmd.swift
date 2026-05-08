@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 func inferredScreenshotPath(prefix: String, format: String) -> String {
-    "screenshots/\(prefix).\(format == "png" ? "png" : "jpg")"
+    "screens/\(prefix).\(format == "png" ? "png" : "jpg")"
 }
 
 func parseWindowFilter(cursor: inout ArgumentCursor) throws -> AppFilter {
