@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { configuredModels, parseModelID } from "./model.ts";
+import { configuredModels, parseModelID } from "../../src/agent/model.ts";
 
 describe("model semantics", () => {
   test("parses provider/model ids", () => {

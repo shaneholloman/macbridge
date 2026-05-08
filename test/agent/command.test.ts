@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { parseModelsArgs, parsePlanArgs, parseRunArgs } from "./command.ts";
+import { parseModelsArgs, parsePlanArgs, parseRunArgs } from "../../src/agent/command.ts";
 
 describe("agent parseModelsArgs", () => {
   test("parses model filters", () => {

@@ -1,3 +1,35 @@
+export { appsUsage, runAppsCommand } from "./adapter/command.js";
+export {
+  appTarget,
+  isTerminalAppAdapter,
+  observeApp,
+  openApplication,
+  quitApplication,
+  selectAppWindow,
+  waitForAdapterWindow,
+  windowsForAdapter,
+} from "./adapter/helpers.js";
+export {
+  appAdapters,
+  getAppAdapter,
+  getTerminalAppAdapter,
+  listAppAdapters,
+  listTerminalAppAdapters,
+  requireAppAdapter,
+  requireTerminalAppAdapter,
+} from "./adapter/registry.js";
+export type {
+  AppAdapter,
+  AppKind,
+  AppLaunchOptions,
+  AppObserveOptions,
+  AppObserveOutput,
+  AppQuitOptions,
+  AppWaitOptions,
+  AppWindowIntent,
+  TerminalAppAdapter,
+  TerminalOpenOptions,
+} from "./adapter/types.js";
 export type {
   AgentRunOptions,
   ModelsOptions,
@@ -25,6 +57,11 @@ export {
   Session,
   validateAction,
 } from "./agent/session.js";
+export { ghosttyAdapter } from "./apps/ghostty.js";
+export { heliumAdapter } from "./apps/helium.js";
+export { observeOutlook, outlookAdapter } from "./apps/outlook.js";
+export { macosTerminalAdapter } from "./apps/terminal.js";
+export { textEditAdapter } from "./apps/textedit.js";
 export type {
   ActCommandOptions,
   ObserveCommandOptions,
@@ -78,15 +115,6 @@ export {
   sleep,
 } from "./native/macbridge.js";
 export { createObservationSummary, redactText } from "./observe/summary.js";
-export type {
-  OutlookObserveOptions,
-  OutlookObserveOutput,
-} from "./observe/targets/outlook.js";
-export {
-  outlookObserveUsage,
-  parseOutlookObserveArgs,
-  runOutlookObserve,
-} from "./observe/targets/outlook.js";
 export type { VerificationContext } from "./observe/verify.js";
 export { verifyExpectation } from "./observe/verify.js";
 export { prefsUsage, runPrefsCommand } from "./prefs/command.js";

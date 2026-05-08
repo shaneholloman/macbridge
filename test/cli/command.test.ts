@@ -1,7 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { mkdirSync, writeFileSync } from "node:fs";
-import type { ControlPlane } from "../core/control.ts";
-import type { Action, Expectation, ObserveInput } from "../protocol/types.ts";
 import {
   CommandUsageError,
   parseActCommand,
@@ -12,7 +10,9 @@ import {
   runActCommand,
   runObserveCommand,
   runVerifyCommand,
-} from "./command.ts";
+} from "../../src/cli/command.ts";
+import type { ControlPlane } from "../../src/core/control.ts";
+import type { Action, Expectation, ObserveInput } from "../../src/protocol/types.ts";
 
 describe("source CLI adapters", () => {
   test("parse delivered command grammar", () => {

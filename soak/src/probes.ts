@@ -5,10 +5,12 @@ import {
   createControlPlane,
   FrameRecorder,
   fixturePlanner,
+  heliumAdapter,
   type Json,
   type PlannedAction,
   Session,
   type Target,
+  textEditAdapter,
   type WindowInfo,
 } from "../../src/index.js";
 import type { Soak } from "./context.js";
@@ -46,8 +48,6 @@ type PermissionReport = {
   }>;
 };
 
-const heliumBundleID = "net.imput.helium";
-
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
@@ -81,30 +81,12 @@ function assertAction(result: ActionResult): Json {
   return result.json ?? { status: result.status };
 }
 
-async function waitForWindow(ctx: Soak, owner: string, attempts = 25): Promise<WindowInfo> {
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
-    const windows = ctx.json<WindowInfo[]>(["windows", "list", "--app", owner]);
-    const candidate = windows.find((window) => window.width > 200 && window.height > 120);
-    if (candidate != null) return candidate;
-    await Bun.sleep(200);
-  }
-  throw new Error(`no usable ${owner} window appeared`);
-}
-
 async function waitForHelium(
   control: ControlPlane,
   predicate: (window: WindowInfo) => boolean = () => true,
   attempts = 30,
 ): Promise<WindowInfo> {
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
-    const windows = control.windows({ kind: "app", bundleID: heliumBundleID });
-    const candidate = windows.find(
-      (window) => window.width > 400 && window.height > 300 && predicate(window),
-    );
-    if (candidate != null) return candidate;
-    await Bun.sleep(300);
-  }
-  throw new Error("no matching Helium window appeared");
+  return heliumAdapter.waitForWindow(control, { attempts, predicate });
 }
 
 async function tryWaitForHelium(
@@ -172,15 +154,7 @@ async function runPlannedAction(
 
 export function cleanupTextEdit(ctx: Soak): void {
   try {
-    ctx.system([
-      "osascript",
-      "-e",
-      'if application "TextEdit" is running then',
-      "-e",
-      'tell application "TextEdit" to quit saving no',
-      "-e",
-      "end if",
-    ]);
+    textEditAdapter.quit();
   } catch (error) {
     ctx.logger.warn({ error }, "textedit cleanup failed");
   }
@@ -188,15 +162,7 @@ export function cleanupTextEdit(ctx: Soak): void {
 
 export function cleanupHelium(ctx: Soak): void {
   try {
-    ctx.system([
-      "osascript",
-      "-e",
-      'if application "Helium" is running then',
-      "-e",
-      'tell application "Helium" to quit',
-      "-e",
-      "end if",
-    ]);
+    heliumAdapter.quit();
   } catch (error) {
     ctx.logger.warn({ error }, "helium cleanup failed");
   }
@@ -323,6 +289,7 @@ export async function cursorWorkflow(ctx: Soak): Promise<void> {
 }
 
 export async function liveTextEditWorkflow(ctx: Soak): Promise<void> {
+  const control = createControlPlane();
   const fixture = ctx.path("textedit-fixture.txt");
 
   await ctx.step("textedit cleanup before", async () => {
@@ -333,12 +300,12 @@ export async function liveTextEditWorkflow(ctx: Soak): Promise<void> {
 
   await ctx.step("textedit open fixture", async () => {
     await Bun.write(fixture, "MacBridge soak fixture\n");
-    ctx.system(["open", "-a", "TextEdit", fixture]);
-    const window = await waitForWindow(ctx, "TextEdit");
+    textEditAdapter.launch({ files: [fixture] });
+    const window = await textEditAdapter.waitForWindow(control);
     return { wid: window.wid, width: window.width, height: window.height };
   });
 
-  const window = await waitForWindow(ctx, "TextEdit");
+  const window = await textEditAdapter.waitForWindow(control);
 
   await ctx.step("textedit capture before", async () => {
     const path = ctx.path("textedit-before.png");
@@ -377,7 +344,7 @@ export async function liveTextEditWorkflow(ctx: Soak): Promise<void> {
   await ctx.step("textedit cleanup after", async () => {
     cleanupTextEdit(ctx);
     await Bun.sleep(500);
-    const windows = ctx.json<WindowInfo[]>(["windows", "list", "--app", "TextEdit"]);
+    const windows = textEditAdapter.windows(control);
     assert(windows.length === 0, "TextEdit window remained after cleanup");
     return { windows: windows.length };
   });
@@ -435,7 +402,7 @@ export async function liveHeliumWorkflow(ctx: Soak): Promise<void> {
     });
 
     await ctx.step("helium cold start", async () => {
-      ctx.system(["open", "-a", "Helium"]);
+      heliumAdapter.launch();
       window = await waitForHelium(control);
       const recordingFrame =
         ctx.options.recordTarget === "window"

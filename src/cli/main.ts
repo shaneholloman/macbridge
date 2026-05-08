@@ -1,6 +1,7 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { runSoakCLI } from "../../soak/src/cli.js";
+import { runAppsCommand } from "../adapter/command.js";
 import {
   agentCommandUsage,
   formatModels,
@@ -13,11 +14,6 @@ import {
 } from "../agent/command.js";
 import { createControlPlane } from "../core/client.js";
 import { defaultBin } from "../native/macbridge.js";
-import {
-  outlookObserveUsage,
-  parseOutlookObserveArgs,
-  runOutlookObserve,
-} from "../observe/targets/outlook.js";
 import { runPrefsCommand } from "../prefs/command.js";
 import { runTerminalCommand } from "../terminal/command.js";
 import { runWorkspaceCommand } from "../workspace/command.js";
@@ -85,6 +81,9 @@ export async function runCLI(args = process.argv.slice(2), io: IO = process): Pr
         return await runAct(args.slice(1), io);
       case "agent":
         return await runAgent(args.slice(1), io);
+      case "app":
+      case "apps":
+        return await runAppsCommand(args.slice(1), createControlPlane, io);
       case "observe":
         return await runObserve(args.slice(1), io);
       case "prefs":
@@ -128,6 +127,8 @@ function usage(): string {
     "  macbridge permissions check --prompt",
     "  macbridge reports",
     "  macbridge prefs init --preferred-screen left",
+    "  macbridge apps list",
+    "  macbridge apps observe helium --launch",
     "  macbridge terminal start",
     '  macbridge terminal send "echo hello"',
     "  macbridge workspace apps",
@@ -210,17 +211,6 @@ async function runAgent(args: string[], io: IO): Promise<number> {
 }
 
 async function runObserve(args: string[], io: IO): Promise<number> {
-  if (args[0] === "outlook") {
-    const targetArgs = args.slice(1);
-    if (targetArgs[0] === "-h" || targetArgs[0] === "--help") {
-      io.stdout.write(`${outlookObserveUsage()}\n`);
-      return 0;
-    }
-    const output = await runOutlookObserve(parseOutlookObserveArgs(targetArgs));
-    io.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
-    return 0;
-  }
-
   const parsed = parseObserveCommand(args);
   if (parsed.kind === "help") {
     io.stdout.write(`${parsed.usage}\n`);

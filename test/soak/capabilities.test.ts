@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { capabilities, formatReportParityIssues, reportParityIssues } from "./capabilities.ts";
-import type { RunSummary, Step } from "./types.ts";
+import {
+  capabilities,
+  formatReportParityIssues,
+  reportParityIssues,
+} from "../../soak/src/capabilities.ts";
+import type { RunSummary, Step } from "../../soak/src/types.ts";
 
 function step(overrides: Partial<Step> = {}): Step {
   return {

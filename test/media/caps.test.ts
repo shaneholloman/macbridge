@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { mediaCapabilities, mediaEncodingCapabilities } from "./caps.ts";
+import { mediaCapabilities, mediaEncodingCapabilities } from "../../src/media/caps.ts";
 
 function hasGlobal(name: string): boolean {
   return typeof (globalThis as Record<string, unknown>)[name] === "function";

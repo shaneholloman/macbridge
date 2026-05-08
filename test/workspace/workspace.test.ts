@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { ControlPlane } from "../core/control.ts";
-import { createPreferences, writePreferences } from "../prefs/preferences.ts";
-import type { DisplayInfo, Target } from "../protocol/types.ts";
-import { focusOffset, workspaceSelection } from "./workspace.ts";
+import type { ControlPlane } from "../../src/core/control.ts";
+import { createPreferences, writePreferences } from "../../src/prefs/preferences.ts";
+import type { DisplayInfo, Target } from "../../src/protocol/types.ts";
+import { focusOffset, workspaceSelection } from "../../src/workspace/workspace.ts";
 
 const displays: DisplayInfo[] = [
   display({ displayID: 1, name: "middle", x: 0, main: true }),

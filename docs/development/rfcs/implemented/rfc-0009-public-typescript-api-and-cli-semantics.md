@@ -204,8 +204,9 @@ The implemented source layout keeps this boundary explicit:
 - `src/protocol` owns public schema and shared data types.
 - `src/agent`, `src/media`, `src/native`, and `src/observe` own their domain
   implementations and tests.
-- `src/observe/targets` owns app-specific observation adapters such as Outlook,
-  and is the intended home for future Teams, Mail, Notes, and similar probes.
+- `src/apps` owns app-specific adapters such as Helium, TextEdit, Ghostty,
+  Terminal, and Outlook. Adapters own app identity, launch/readiness, window
+  selection, cleanup, and app-specific observation behavior.
 - `src/cli/main.ts` owns the TypeScript product CLI entrypoint. `tools/` is not
   a valid product boundary.
 

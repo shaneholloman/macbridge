@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { Observation } from "../protocol/types.js";
-import { createObservationSummary, redactText } from "./summary.js";
+import { createObservationSummary, redactText } from "../../src/observe/summary.js";
+import type { Observation } from "../../src/protocol/types.js";
 
 function fixtureObservation(): Observation {
   return {

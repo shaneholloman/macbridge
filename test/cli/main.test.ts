@@ -3,7 +3,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { runSoakCLI } from "../../soak/src/cli.ts";
-import { isTypeScriptCommand, runCLI } from "./main.ts";
+import { isTypeScriptCommand, runCLI } from "../../src/cli/main.ts";
 
 function io() {
   let stdout = "";
@@ -46,12 +46,12 @@ describe("TypeScript CLI entrypoint", () => {
     expect(fixture.output().stderr).toBe("");
   });
 
-  test("prints observe target help", async () => {
+  test("prints adapter observe help", async () => {
     const fixture = io();
-    const status = await runCLI(["observe", "outlook", "--help"], fixture.io);
+    const status = await runCLI(["apps", "observe", "outlook", "--help"], fixture.io);
 
     expect(status).toBe(0);
-    expect(fixture.output().stdout).toContain("macbridge observe outlook");
+    expect(fixture.output().stdout).toContain("macbridge apps observe <adapter>");
     expect(fixture.output().stderr).toBe("");
   });
 

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { mkdirSync } from "node:fs";
-import type { Recording } from "../protocol/types.ts";
-import { probeMedia } from "./caps.ts";
-import { encodeRecording } from "./recording.ts";
+import { probeMedia } from "../../src/media/caps.ts";
+import { encodeRecording } from "../../src/media/recording.ts";
+import type { Recording } from "../../src/protocol/types.ts";
 
 function hasBinary(name: string): boolean {
   return (

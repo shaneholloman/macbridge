@@ -58,13 +58,16 @@ macbridge act action.json
 macbridge verify expectation.json
 macbridge agent models --type text --provider openai --json
 macbridge prefs init --preferred-screen left
+macbridge apps list
+macbridge apps observe helium --launch
 macbridge terminal start --screen left --session macbridge
 macbridge terminal send "echo hello" --session macbridge
 ```
 
-Workspace preferences live at `~/MacBridge/preferences.toml`. The terminal lane
-uses a read-only visible Ghostty client backed by tmux so MacBridge can drive a
-dedicated screen while the human keeps working elsewhere.
+Workspace preferences live at `~/MacBridge/preferences.toml`. App-specific
+behavior lives behind `src/apps` adapters, and the terminal lane uses a selected
+terminal adapter backed by tmux so MacBridge can drive a dedicated screen while
+the human keeps working elsewhere.
 
 ## Documentation
 

@@ -35,6 +35,8 @@ bunx macbridge act action.json
 bunx macbridge verify expectation.json
 bunx macbridge agent models --type text --provider openai --json
 bunx macbridge prefs init --preferred-screen left
+bunx macbridge apps list
+bunx macbridge apps observe helium --launch --out tmp/observations/helium
 bunx macbridge terminal start --screen left --session macbridge
 bunx macbridge terminal send "echo hello from the owned lane" --session macbridge
 ```
@@ -51,9 +53,11 @@ Use preferences to map physical screens to workspace names such as `left`,
 `middle`, and `right`, then choose the default automation workspace:
 
 ```toml
+version = 2
+
 [workspace]
 preferredScreen = "left"
-terminalApp = "Ghostty"
+terminalAdapter = "ghostty"
 terminalSession = "macbridge"
 terminalReadOnly = true
 ```
@@ -61,6 +65,18 @@ terminalReadOnly = true
 The preferred workspace screen is intent, not fixed geometry. MacBridge resolves
 the named screen against the currently attached displays and maximizes owned
 windows to that screen's visible frame. Full-screen Spaces are avoided.
+
+## App Adapters
+
+MacBridge keeps app-specific policy in TypeScript adapters under `src/apps`.
+Adapters own app identity, launch, quit, readiness, window selection, and any
+workflow-specific observation behavior. Built-in adapters currently cover
+Helium, TextEdit, Ghostty, macOS Terminal, and Microsoft Outlook.
+
+```bash
+macbridge apps list
+macbridge apps observe outlook --launch --out tmp/observations/outlook
+```
 
 ## Terminal Lane
 
@@ -73,9 +89,10 @@ macbridge terminal send "bun run dev" --session macbridge
 macbridge terminal capture --session macbridge -o tmp/macbridge-lane.png
 ```
 
-The visible terminal client is read-only by default. It can show exactly what
-MacBridge is doing while protecting the lane from accidental human keystrokes.
-Use `--writable` only when intentionally debugging the terminal manually.
+The visible terminal client is read-only by default. The selected terminal
+adapter, `ghostty` by default, decides how to attach a visible app window to the
+tmux-backed lane. Use `--writable` only when intentionally debugging the
+terminal manually.
 
 ## Capture Semantics
 

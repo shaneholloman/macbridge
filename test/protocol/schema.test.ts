@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { parseAction, parseExpectation, parseObserveInput, parsePlan } from "./schema.ts";
+import {
+  parseAction,
+  parseExpectation,
+  parseObserveInput,
+  parsePlan,
+} from "../../src/protocol/schema.ts";
 
 describe("parseAction", () => {
   test("accepts a typed click action", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { PlannerInput } from "../protocol/types.ts";
-import { adapterPlanner, parsePlannerOutput, shellPlanner } from "./planner.ts";
+import { adapterPlanner, parsePlannerOutput, shellPlanner } from "../../src/agent/planner.ts";
+import type { PlannerInput } from "../../src/protocol/types.ts";
 
 const plan = {
   action: { type: "activate", target: { kind: "app", name: "Helium" } },

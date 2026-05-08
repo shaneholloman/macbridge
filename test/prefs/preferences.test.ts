@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import type { DisplayInfo } from "../protocol/types.ts";
 import {
   createPreferences,
   formatPreferences,
   parsePreferences,
   resolveWorkspaceScreen,
-} from "./preferences.ts";
+} from "../../src/prefs/preferences.ts";
+import type { DisplayInfo } from "../../src/protocol/types.ts";
 
 const displays: DisplayInfo[] = [
   display({ displayID: 1, name: "middle", x: 0, main: true }),
@@ -18,6 +18,7 @@ describe("MacBridge preferences", () => {
     const preferences = createPreferences(displays, { preferredScreen: "left" });
 
     expect(preferences.workspace.preferredScreen).toBe("left");
+    expect(preferences.workspace.terminalAdapter).toBe("ghostty");
     expect(preferences.workspace.terminalReadOnly).toBe(true);
     expect(preferences.screens.left?.displayID).toBe(2);
     expect(preferences.screens.middle?.displayID).toBe(1);

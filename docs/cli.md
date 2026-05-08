@@ -1,8 +1,8 @@
 # CLI Reference
 
 The public CLI is named `macbridge`. It routes TypeScript-owned commands such
-as `agent`, `observe`, `act`, and `verify`, and forwards native macOS commands
-to the Swift runtime.
+as `apps`, `agent`, `observe`, `act`, and `verify`, and forwards native macOS
+commands to the Swift runtime.
 
 For a new machine, npm is the bootstrap path:
 
@@ -26,6 +26,20 @@ For TypeScript harness commands during development, use Bun:
 ```bash
 bunx macbridge observe desktop --display-screenshot main
 ```
+
+## App Adapters
+
+App-specific behavior lives behind explicit adapters:
+
+```bash
+macbridge apps list
+macbridge apps observe helium --launch --out tmp/observations/helium
+macbridge apps observe outlook --launch --prompt --out tmp/observations/outlook
+```
+
+Adapters own app identity, launch/readiness, window selection, cleanup, and
+workflow-specific observation behavior. The built-ins are `helium`, `textedit`,
+`ghostty`, `terminal`, and `outlook`.
 
 ## Preferences
 
@@ -52,9 +66,10 @@ macbridge terminal capture --session macbridge -o tmp/lane.png
 macbridge terminal stop --session macbridge
 ```
 
-The default visible Ghostty client is read-only and attached to a tmux session.
-MacBridge sends commands to tmux programmatically, so the human can continue
-working on another screen without fighting for keyboard focus.
+The default `ghostty` terminal adapter opens a read-only visible client attached
+to a tmux session. The `terminal` adapter targets macOS Terminal.app. MacBridge
+sends commands to tmux programmatically, so the human can continue working on
+another screen without fighting for keyboard focus.
 
 This is a terminal/PTY solution. Ordinary GUI apps still use native macOS
 operations such as Accessibility, activation, window placement, capture, and

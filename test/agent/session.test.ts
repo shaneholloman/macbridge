@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { mkdirSync, writeFileSync } from "node:fs";
-import type { ControlPlane } from "../core/control.ts";
-import { FrameRecorder } from "../media/recording.ts";
-import { verifyExpectation } from "../observe/verify.ts";
-import type { ActionResult, Observation } from "../protocol/types.ts";
-import { fixturePlanner, Session, validateAction } from "./session.ts";
+import { fixturePlanner, Session, validateAction } from "../../src/agent/session.ts";
+import type { ControlPlane } from "../../src/core/control.ts";
+import { FrameRecorder } from "../../src/media/recording.ts";
+import { verifyExpectation } from "../../src/observe/verify.ts";
+import type { ActionResult, Observation } from "../../src/protocol/types.ts";
 
 function observation(): Observation {
   return {

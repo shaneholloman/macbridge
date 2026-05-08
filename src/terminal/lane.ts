@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
+import { requireTerminalAppAdapter } from "../adapter/registry.js";
+import type { TerminalAppAdapter } from "../adapter/types.js";
 import type { ControlPlane } from "../core/control.js";
 import type { WindowInfo } from "../native/macbridge.js";
 import { loadPreferences, resolveWorkspaceScreen } from "../prefs/preferences.js";
@@ -40,11 +42,12 @@ export function resolveLane(
   options: { screen?: string; session?: string } = {},
 ): TerminalLane {
   const preferences = loadPreferences();
+  const adapter = requireTerminalAppAdapter(preferences.workspace.terminalAdapter);
   const resolved = resolveWorkspaceScreen(preferences, control.displays(), options.screen);
   const session = options.session ?? preferences.workspace.terminalSession;
-  const windows = terminalWindows(control, preferences.workspace.terminalApp).filter((window) =>
-    containsWindow(resolved.display, window),
-  );
+  const windows = adapter
+    .windows(control)
+    .filter((window) => containsWindow(resolved.display, window));
   return {
     session,
     screen: resolved.name,
@@ -55,6 +58,7 @@ export function resolveLane(
 
 export function startLane(control: ControlPlane, options: TerminalStartOptions = {}): TerminalLane {
   const preferences = loadPreferences();
+  const adapter = requireTerminalAppAdapter(preferences.workspace.terminalAdapter);
   const resolved = resolveWorkspaceScreen(preferences, control.displays(), options.screen);
   const session = options.session ?? preferences.workspace.terminalSession;
   const cwd = options.cwd ?? preferences.workspace.terminalCwd ?? process.cwd();
@@ -64,27 +68,19 @@ export function startLane(control: ControlPlane, options: TerminalStartOptions =
     sendTmux(session, options.command, true);
   }
 
-  const before = terminalWindows(control, preferences.workspace.terminalApp);
-  const attachArgs = [
-    "-na",
-    terminalAppTarget(preferences.workspace.terminalApp),
-    "--args",
-    "-e",
+  const before = adapter.windows(control);
+  adapter.terminal.openSession({
+    session,
     tmuxBin,
-    "attach-session",
-  ];
-  if (preferences.workspace.terminalReadOnly && !options.writable) {
-    attachArgs.push("-r");
-  }
-  attachArgs.push("-t", session);
-  spawnSync("open", attachArgs);
+    readOnly: preferences.workspace.terminalReadOnly && !options.writable,
+  });
 
-  const window = waitForTerminalWindow(control, preferences.workspace.terminalApp, before, 5000);
+  const window = waitForTerminalWindow(control, adapter, before, 5000);
   const targetWindow =
     window ??
-    terminalWindows(control, preferences.workspace.terminalApp).find(
-      (candidate) => candidate.name === "~",
-    );
+    adapter
+      .windows(control)
+      .find((candidate) => adapter.terminal.fallbackWindowTitles.includes(candidate.name));
   if (targetWindow != null) {
     control.setFrame({ kind: "window", wid: targetWindow.wid }, laneFrame(resolved.display));
   }
@@ -109,20 +105,6 @@ export function stopLane(control: ControlPlane, options: { session?: string } = 
   const lane = resolveLane(control, options);
   runTmux(["kill-session", "-t", lane.session], { allowFailure: true });
   return lane;
-}
-
-function terminalWindows(control: ControlPlane, app: string): WindowInfo[] {
-  return control.windows({ kind: "app", name: terminalAppName(app) });
-}
-
-function terminalAppTarget(app: string): string {
-  if (app.includes("/") || app.endsWith(".app")) return app;
-  return `${app}.app`;
-}
-
-function terminalAppName(app: string): string {
-  const name = app.replace(/\/+$/u, "").split("/").at(-1);
-  return (name ?? app).replace(/\.app$/u, "");
 }
 
 function containsWindow(display: DisplayInfo, window: WindowInfo): boolean {
@@ -173,14 +155,14 @@ function runTmux(args: string[], options: { allowFailure?: boolean } = {}): void
 
 function waitForTerminalWindow(
   control: ControlPlane,
-  app: string,
+  adapter: TerminalAppAdapter,
   before: WindowInfo[],
   timeoutMs: number,
 ): WindowInfo | undefined {
   const known = new Set(before.map((window) => window.wid));
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
-    const current = terminalWindows(control, app);
+    const current = adapter.windows(control);
     const fresh = current.find((window) => !known.has(window.wid));
     if (fresh != null) return fresh;
     Bun.sleepSync(100);

@@ -13,10 +13,10 @@ export type ScreenPreference = {
 };
 
 export type Preferences = {
-  version: 1;
+  version: 2;
   workspace: {
     preferredScreen: string;
-    terminalApp: string;
+    terminalAdapter: string;
     terminalSession: string;
     terminalReadOnly: boolean;
     terminalCwd?: string;
@@ -34,7 +34,7 @@ type PreferenceInput = {
   version?: unknown;
   workspace?: {
     preferredScreen?: unknown;
-    terminalApp?: unknown;
+    terminalAdapter?: unknown;
     terminalSession?: unknown;
     terminalReadOnly?: unknown;
     terminalCwd?: unknown;
@@ -67,10 +67,10 @@ export function createPreferences(
   const screens = inferScreenPreferences(displays);
   const preferredScreen = options.preferredScreen ?? (screens.left == null ? "main" : "left");
   return {
-    version: 1,
+    version: 2,
     workspace: {
       preferredScreen,
-      terminalApp: "Ghostty",
+      terminalAdapter: "ghostty",
       terminalSession: "macbridge",
       terminalReadOnly: true,
       ...(options.cwd == null ? {} : { terminalCwd: options.cwd }),
@@ -101,8 +101,8 @@ export function preferencesExist(path = preferencesPath()): boolean {
 
 export function parsePreferences(text: string): Preferences {
   const parsed = Bun.TOML.parse(text) as PreferenceInput;
-  if (parsed.version !== 1) {
-    throw new Error("MacBridge preferences version must be 1");
+  if (parsed.version !== 2) {
+    throw new Error("MacBridge preferences version must be 2");
   }
   if (parsed.workspace == null) {
     throw new Error("MacBridge preferences need a [workspace] section");
@@ -115,9 +115,9 @@ export function parsePreferences(text: string): Preferences {
     parsed.workspace.preferredScreen,
     "workspace.preferredScreen",
   );
-  const terminalApp = stringValue(
-    parsed.workspace.terminalApp ?? "Ghostty",
-    "workspace.terminalApp",
+  const terminalAdapter = stringValue(
+    parsed.workspace.terminalAdapter ?? "ghostty",
+    "workspace.terminalAdapter",
   );
   const terminalSession = stringValue(
     parsed.workspace.terminalSession ?? "macbridge",
@@ -145,10 +145,10 @@ export function parsePreferences(text: string): Preferences {
   }
 
   return {
-    version: 1,
+    version: 2,
     workspace: {
       preferredScreen,
-      terminalApp,
+      terminalAdapter,
       terminalSession,
       terminalReadOnly,
       ...(terminalCwd == null ? {} : { terminalCwd }),
@@ -161,11 +161,11 @@ export function formatPreferences(preferences: Preferences): string {
   const lines = [
     "# MacBridge user preferences",
     "# Screen aliases are physical workspace intent, not generic display IDs.",
-    "version = 1",
+    "version = 2",
     "",
     "[workspace]",
     `preferredScreen = ${tomlString(preferences.workspace.preferredScreen)}`,
-    `terminalApp = ${tomlString(preferences.workspace.terminalApp)}`,
+    `terminalAdapter = ${tomlString(preferences.workspace.terminalAdapter)}`,
     `terminalSession = ${tomlString(preferences.workspace.terminalSession)}`,
     `terminalReadOnly = ${preferences.workspace.terminalReadOnly}`,
   ];

@@ -12,5 +12,5 @@
     "exactOptionalPropertyTypes": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "tools/**/*.ts", "soak/**/*.ts", "build/**/*.ts"]
+  "include": ["src/**/*.ts", "soak/**/*.ts", "build/**/*.ts", "test/**/*.ts"]
 }

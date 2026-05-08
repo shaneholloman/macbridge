@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { errorBrief, recordingEvidence } from "./evidence.ts";
-import type { RunSummary } from "./types.ts";
+import { errorBrief, recordingEvidence } from "../../soak/src/evidence.ts";
+import type { RunSummary } from "../../soak/src/types.ts";
 
 function run(overrides: Partial<RunSummary> = {}): RunSummary {
   return {
